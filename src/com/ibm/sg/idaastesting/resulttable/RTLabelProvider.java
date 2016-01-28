@@ -26,6 +26,20 @@ public class RTLabelProvider extends LabelProvider implements ITableLabelProvide
 			return model.getNo();
 		case 1:
 			return model.getMethod();
+		case 2:
+			return model.getExpectedStatus();
+		case 3:
+			return model.getExpectedMsg();
+		case 4:			
+			return model.getActualStatus();
+		case 5:
+			return model.getActualMsg();
+		case 6:
+			return model.getUrl();
+		case 7:
+			return model.getHead();			
+		case 8:
+			return model.getData();	
 		default:
 			break;
 		}

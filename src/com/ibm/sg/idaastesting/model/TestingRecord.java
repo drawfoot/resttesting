@@ -8,6 +8,7 @@ public class TestingRecord {
 	private String actualStatus;
 	private String actualMsg;
 	private String url;
+	private String head;	
 	private String data;
 	
 	public TestingRecord(String no, String method) {
@@ -57,6 +58,15 @@ public class TestingRecord {
 	public void setUrl(String url) {
 		this.url = url;
 	}
+
+	public String getHead() {
+		return head;
+	}
+
+	public void setHead(String head) {
+		this.head = head;
+	}
+
 	public String getData() {
 		return data;
 	}

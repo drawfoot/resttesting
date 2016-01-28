@@ -15,5 +15,6 @@
 	<classpathentry kind="lib" path="C:/rodney/greenapp/eclipse_plugin/plugins/com.ibm.icu_4.4.2.v20110823.jar" sourcepath="C:/rodney/greenapp/eclipse_plugin/plugins/com.ibm.icu.source_4.4.2.v20110823.jar"/>
 	<classpathentry kind="lib" path="C:/rodney/greenapp/eclipse_plugin/plugins/org.eclipse.ui.forms_3.5.200.v20120705-114351.jar" sourcepath="C:/rodney/greenapp/eclipse_plugin/plugins/org.eclipse.ui.forms.source_3.5.200.v20120705-114351.jar"/>
 	<classpathentry kind="lib" path="swing2swt.jar"/>
+	<classpathentry kind="lib" path="lib/commons-httpclient-3.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

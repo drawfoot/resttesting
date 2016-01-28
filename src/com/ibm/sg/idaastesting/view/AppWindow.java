@@ -12,21 +12,19 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.jface.text.JFaceTextUtil;
 import org.eclipse.jface.text.TextViewer;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 
 import com.ibm.sg.idaastesting.model.TestingRecordList;
 import com.ibm.sg.idaastesting.model.TestingRecord;
-import com.ibm.sg.idaastesting.resulttable.RTContentProvider;
-import com.ibm.sg.idaastesting.resulttable.RTLabelProvider;
+import com.ibm.sg.idaastesting.resulttable.RTTable;
 
 public class AppWindow extends ApplicationWindow {
-	private TestingRecordList tableModel;
+	private TestingRecordList recordList = new TestingRecordList();
+	private TextViewer textViewer;
+	private RTTable resultTable;
 
 	/**
 	 * Create the application window,
@@ -49,99 +47,44 @@ public class AppWindow extends ApplicationWindow {
 		Composite container = new Composite(parent, SWT.EMBEDDED);
 		container.setLayout(new FillLayout(SWT.HORIZONTAL));
 
-		SashForm sashForm = new SashForm(container, SWT.BORDER | SWT.SMOOTH
-				| SWT.VERTICAL);
+		SashForm sashForm = new SashForm(container, SWT.BORDER | SWT.VERTICAL);
+		sashForm.setSashWidth(2);
 
 		Group grpTestingScripts = new Group(sashForm, SWT.NONE);
 		grpTestingScripts.setText("Testing Scripts");
 		grpTestingScripts.setLayout(new FillLayout(SWT.HORIZONTAL));
 
 		// Script Text Box
-		TextViewer textViewer = new TextViewer(grpTestingScripts, SWT.BORDER
+		textViewer = new TextViewer(grpTestingScripts, SWT.BORDER
 				| SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		StyledText styledText = textViewer.getTextWidget();
 
 		// Checked Table Viewer
 		Group grpParsedTestCases = new Group(sashForm, SWT.NONE);
 		grpParsedTestCases.setText("Parsed Scripts and Run Results");
 		grpParsedTestCases.setLayout(new FillLayout(SWT.HORIZONTAL));
-
-		final CheckboxTableViewer checkboxTableViewer = CheckboxTableViewer
-				.newCheckList(grpParsedTestCases, SWT.BORDER
-						| SWT.FULL_SELECTION);
-		Table table = checkboxTableViewer.getTable();
-		table.setLinesVisible(true);
-		table.setHeaderVisible(true);
-
-		TableViewerColumn tableColumnNo = new TableViewerColumn(
-				checkboxTableViewer, SWT.NONE);
-		TableColumn tblclmnNewColumn = tableColumnNo.getColumn();
-		tblclmnNewColumn.setWidth(44);
-		tblclmnNewColumn.setText("No.");
-
-		TableViewerColumn tableColumnMethod = new TableViewerColumn(
-				checkboxTableViewer, SWT.NONE);
-		TableColumn tblclmnNewColumn_2 = tableColumnMethod.getColumn();
-		tblclmnNewColumn_2.setWidth(71);
-		tblclmnNewColumn_2.setText("Method");
-
-		TableViewerColumn tableColumnExpStatus = new TableViewerColumn(
-				checkboxTableViewer, SWT.NONE);
-		TableColumn tblclmnExpectStatus = tableColumnExpStatus.getColumn();
-		tblclmnExpectStatus.setWidth(100);
-		tblclmnExpectStatus.setText("Expect Status");
-
-		TableViewerColumn tableViewerColumn_5 = new TableViewerColumn(
-				checkboxTableViewer, SWT.NONE);
-		TableColumn tblclmnNewColumn_4 = tableViewerColumn_5.getColumn();
-		tblclmnNewColumn_4.setWidth(94);
-		tblclmnNewColumn_4.setText("Expect Msg");
-
-		TableViewerColumn tableViewerColumn_6 = new TableViewerColumn(
-				checkboxTableViewer, SWT.NONE);
-		TableColumn tblclmnActualStatus = tableViewerColumn_6.getColumn();
-		tblclmnActualStatus.setWidth(100);
-		tblclmnActualStatus.setText("Actual Status");
-
-		TableViewerColumn tableViewerColumn_7 = new TableViewerColumn(
-				checkboxTableViewer, SWT.NONE);
-		TableColumn tblclmnActualMsg = tableViewerColumn_7.getColumn();
-		tblclmnActualMsg.setWidth(100);
-		tblclmnActualMsg.setText("Actual Msg");
-
-		TableViewerColumn tableViewerColumn_1 = new TableViewerColumn(
-				checkboxTableViewer, SWT.NONE);
-		TableColumn tblclmnNewColumn_1 = tableViewerColumn_1.getColumn();
-		tblclmnNewColumn_1.setWidth(59);
-		tblclmnNewColumn_1.setText("URL");
-
-		TableViewerColumn tableViewerColumn_3 = new TableViewerColumn(
-				checkboxTableViewer, SWT.NONE);
-		TableColumn tblclmnNewColumn_3 = tableViewerColumn_3.getColumn();
-		tblclmnNewColumn_3.setWidth(100);
-		tblclmnNewColumn_3.setText("Data");
-
-		checkboxTableViewer.setContentProvider(new RTContentProvider());
-		checkboxTableViewer.setLabelProvider(new RTLabelProvider());
-		tableModel = new TestingRecordList();
-		checkboxTableViewer.setInput(tableModel.getModel());
+		resultTable = new RTTable(grpParsedTestCases, SWT.BORDER
+				| SWT.FULL_SELECTION, recordList);
 
 		// Action Buttons
 		Group group = new Group(sashForm, SWT.NONE);
-		group.setEnabled(false);
 		group.setLayout(new FillLayout(SWT.HORIZONTAL));
 
 		Button btnParseTestingScripts = new Button(group, SWT.NONE);
 		btnParseTestingScripts.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				getParseScriptsTask(checkboxTableViewer).start();
+				getParseScriptsTask().start();				
 			}
 		});
-		btnParseTestingScripts.setText("Parse Testing Scripts");
+		btnParseTestingScripts.setText("Parse");
 
 		Button btnRunTestCases = new Button(group, SWT.NONE);
-		btnRunTestCases.setText("Run Test Cases");
+		btnRunTestCases.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
+		btnRunTestCases.setText("Run");
 
 		Button btnConfiguration = new Button(group, SWT.NONE);
 		btnConfiguration.setText("Configuration");
@@ -176,23 +119,85 @@ public class AppWindow extends ApplicationWindow {
 		return new Point(705, 479);
 	}
 
-	public Thread getParseScriptsTask(final CheckboxTableViewer viewer) {
+	public Thread getParseScriptsTask() {
 		return new Thread() {
+			@Override
 			public void run() {
-				// do parsing
-				System.out.println("parsing");
-				final TestingRecord element = new TestingRecord("3", "dynamics added");
-				tableModel.addTestingRecord(element);
-				
-				// update viewer
-				Display disp = Display.getDefault();
-				disp.asyncExec(new Runnable() {
+				Display.getDefault().asyncExec(new Runnable() {
+					@Override
 					public void run() {
-						viewer.add(element);
-					}
-				});
-			}
+						// clear old data
+						recordList.reset();
+						resultTable.getViewer().refresh();
 
-		};
+						StyledText recordsText = textViewer.getTextWidget();
+						int totallines = recordsText.getLineCount();
+						int index = 0;
+						String line;						
+						while (index <= totallines) {
+								line = recordsText.getLine(index).trim();
+								index++;
+								if(line.equals(""))
+									continue;
+								TestingRecord record = new TestingRecord(null, null);
+								parseRecord(line, record);
+								recordList.addTestingRecord(record);
+								resultTable.getViewer().add(record);
+						}// while
+						resultTable.adjustColumnWidth();
+					} // run
+				}); // Runnable
+			}// run
+		};// thread
+	}// getParseScriptsTask
+	
+	public Thread getRunTestingTask() {
+		return new Thread() {
+			@Override
+			public void run() {
+				Display.getDefault().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						//TODO
+					} // run
+				}); // Runnable
+			}// run
+		};// thread
+	}// getRunTestingTask
+
+	
+	void parseRecord(String str, TestingRecord record) {
+		String[] parts = str.split("\\|");
+		if(parts[1].equals("DELETE")) {
+			parseRecordDelete(parts, record);
+		}
+	}
+	
+// no.0|delete1|host2|lmi3|url4|user5|pass6|header7|expect_sc8|9|number(?)10|expect msg11
+	void parseRecordDelete(String[] parts, TestingRecord record) {	
+		record.setNo(parts[0]);
+		record.setMethod(parts[1]);
+		
+		String url = parts[4].replaceAll("\\/v1\\/mgmt\\/idaas",
+				"com.ibm.security.access.idaas.rest.services");
+		url = url.replaceAll("#", "|");
+		String host = "http://localhost:9080";
+		record.setUrl(String.format("%s/%s", host, url));
+		
+		record.setHead(parts[7]);
+		record.setExpectedStatus(parts[8]);
+		record.setExpectedMsg(parts[11]);
+	}
+	
+	void parseRecordGET(String[] parts, TestingRecord record) {
+		//TODO
+	}
+	
+	void parseRecorPUT(String[] parts, TestingRecord record) {
+		//TODO
+	}
+	
+	void parseRecordPOST(String[] parts, TestingRecord record) {
+		//TODO
 	}
 }
