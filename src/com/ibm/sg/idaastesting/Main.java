@@ -2,7 +2,6 @@ package com.ibm.sg.idaastesting;
 
 import org.eclipse.swt.widgets.Display;
 
-import com.ibm.sg.idaastesting.view.AppWindow;
 
 public class Main {
 	/**

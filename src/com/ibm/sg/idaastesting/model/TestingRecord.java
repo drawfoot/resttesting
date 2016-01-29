@@ -10,7 +10,11 @@ public class TestingRecord {
 	private String url;
 	private String head;	
 	private String data;
-	
+
+	private String user;
+	private String pass;
+	private String tenant;
+
 	public TestingRecord(String no, String method) {
 		this.no = no;
 		this.method = method;
@@ -73,5 +77,29 @@ public class TestingRecord {
 	public void setData(String data) {
 		this.data = data;
 	}
-	
+
+	public String getUser() {
+		return user;
+	}
+
+	public void setUser(String user) {
+		this.user = user;
+	}
+
+	public String getPass() {
+		return pass;
+	}
+
+	public void setPass(String pass) {
+		this.pass = pass;
+	}
+
+	public String getTenant() {
+		return tenant;
+	}
+
+	public void setTenant(String tenant) {
+		this.tenant = tenant;
+	}
+
 }
