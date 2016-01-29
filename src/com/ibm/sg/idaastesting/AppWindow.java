@@ -1,7 +1,9 @@
 package com.ibm.sg.idaastesting;
 
 import java.util.HashMap;
+import java.util.List;
 
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
@@ -72,20 +74,33 @@ public class AppWindow extends ApplicationWindow {
 		// upper
 		SashForm sashForm_upper = new SashForm(grpTestingScripts, SWT.NONE);
 		
+				Button btnOpen = new Button(sashForm_upper, SWT.NONE);
+				btnOpen.setText("Open");
+		
+				Button btnSave = new Button(sashForm_upper, SWT.NONE);
+				btnSave.setText("Save");
+		
 		// upper left
 		textViewer = new TextViewer(sashForm_upper, SWT.BORDER | SWT.MULTI
 				| SWT.H_SCROLL | SWT.V_SCROLL);
-		
-		// upper right
-		Button btnParseTestingScripts = new Button(sashForm_upper, SWT.NONE);
-		btnParseTestingScripts.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				getParseScriptsTask().start();
-			}
-		});
-		btnParseTestingScripts.setText("Parse");
-		sashForm_upper.setWeights(new int[] { 5, 1 });
+		textViewer.getTextWidget().setText(
+				"35.11.1.1|DELETE|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=description=ACE25-description|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"ACE1-user\",\"iv-groups\":\"ACE-group1\"}|204||1|(ˆ$) \n" +
+				"35.11.1.2|DELETE|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=description=[ACE25-description]|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"ACE1-user\",\"iv-groups\":\"ACE-group1\"}|204||1|(ˆ$) \n" +
+				"35.11.2.1|DELETE|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=description=ACE5-description|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"ACE1-user\",\"iv-groups\":\"ACE-group1,ACE-group2\"}|204||1|(ˆ$)\n" +
+				"35.11.2.2|DELETE|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=description=[ACE5-description]|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"ACE1-user\",\"iv-groups\":\"ACE-group1,ACE-group2\"}|204||1|(ˆ$)\n" +
+				"35.11.3.1|DELETE|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=description=ACE13-description|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"randomUsr\",\"iv-groups\":\"ACE-group1\"}|204||1|(ˆ$) \n" +
+				"35.11.3.2|DELETE|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=description=[ACE13-description]|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"randomUsr\",\"iv-groups\":\"ACE-group1\"}|204||1|(ˆ$)");
+				
+				// upper right
+				Button btnParseTestingScripts = new Button(sashForm_upper, SWT.NONE);
+				btnParseTestingScripts.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						getParseScriptsTask().start();
+					}
+				});
+				btnParseTestingScripts.setText("Parse");
+		sashForm_upper.setWeights(new int[] {41, 39, 550, 40});
 		// upper end
 		
 		// bottom
@@ -97,51 +112,76 @@ public class AppWindow extends ApplicationWindow {
 		// bottom upper
 		//Group group_resulttable = new Group(sashForm_lower, SWT.NONE);
 		resultTable = new RTTable(sashForm_lower, SWT.BORDER
-				| SWT.FULL_SELECTION, recordList);
+				| SWT.FULL_SELECTION|SWT.MULTI, recordList);
+		
+		//resultTable.getViewer().addSelectionChangedListener(listener);
 
 		// bottom lower
-		SashForm sashForm_1 = new SashForm(sashForm_lower, SWT.HORIZONTAL);
-
-		Button btnNewButton_1 = new Button(sashForm_1, SWT.NONE);
-		btnNewButton_1.setText("Open");
-
-		Button btnNewButton = new Button(sashForm_1, SWT.NONE);
-		btnNewButton.setText("Save");
-
-		Button btnConfiguration = new Button(sashForm_1, SWT.NONE);
-		btnConfiguration.setText("Configuration");
-		final Button btnCheckButton = new Button(sashForm_1, SWT.BORDER | SWT.FLAT
+		SashForm sashFormBottomL = new SashForm(sashForm_lower, SWT.HORIZONTAL);
+		final Button btnCheckAll = new Button(sashFormBottomL, SWT.BORDER | SWT.FLAT
 				| SWT.CHECK | SWT.CENTER);
-		btnCheckButton.addSelectionListener(new SelectionAdapter() {
+		btnCheckAll.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if(btnCheckButton.getSelection() == true)
+				if(btnCheckAll.getSelection() == true)
 					resultTable.getViewer().setAllChecked(true);
 				else
 					resultTable.getViewer().setAllChecked(false);					
 			}
 		});
-		btnCheckButton.setSelection(true);
-		btnCheckButton.setText("Check All");
+		btnCheckAll.setSelection(true);
+		btnCheckAll.setText("Check All");
 		
-		SashForm sashForm_2 = new SashForm(sashForm_1, SWT.VERTICAL);
-
-		text = new Text(sashForm_2, SWT.BORDER);
-		text.setToolTipText("filter text");
-
-		Combo combo = new Combo(sashForm_2, SWT.NONE);
-		combo.setText("filter by");
-		sashForm_2.setWeights(new int[] { 1, 1 });
-
-		Button btnRunTestCases = new Button(sashForm_1, SWT.NONE);
-		btnRunTestCases.addSelectionListener(new SelectionAdapter() {
+		SashForm sashForm_1 = new SashForm(sashFormBottomL, SWT.VERTICAL);
+		
+		Button btnCheckSelected = new Button(sashForm_1, SWT.NONE);
+		btnCheckSelected.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				getRunTestingTask().start();
+				IStructuredSelection selection = (IStructuredSelection) resultTable
+						.getViewer().getSelection();
+				for(Object element: selection.toArray()) {
+					resultTable.getViewer().setChecked(element, true);
+				}
 			}
 		});
-		btnRunTestCases.setText("Run");
-		sashForm_1.setWeights(new int[] {1, 1, 1, 1, 1, 1});
+		btnCheckSelected.setText("Check Selected");
+		
+		Button btnUncheckSelected = new Button(sashForm_1, SWT.NONE);
+		btnUncheckSelected.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				IStructuredSelection selection = (IStructuredSelection) resultTable
+						.getViewer().getSelection();
+				for(Object element: selection.toArray()) {
+					resultTable.getViewer().setChecked(element, false);
+				}
+			}
+		});
+		btnUncheckSelected.setText("Uncheck Selected");
+		sashForm_1.setWeights(new int[] {1, 1});
+		
+		SashForm sashFormBottomLFilter = new SashForm(sashFormBottomL, SWT.VERTICAL);
+
+		text = new Text(sashFormBottomLFilter, SWT.BORDER);
+		text.setToolTipText("filter text");
+
+		Combo combo = new Combo(sashFormBottomLFilter, SWT.NONE);
+		combo.setText("filter by");
+		sashFormBottomLFilter.setWeights(new int[] { 1, 1 });
+				
+						Button btnRunTestCases = new Button(sashFormBottomL, SWT.NONE);
+						btnRunTestCases.addSelectionListener(new SelectionAdapter() {
+							@Override
+							public void widgetSelected(SelectionEvent e) {
+								getRunTestingTask().start();
+							}
+						});
+						btnRunTestCases.setText("Run");
+		
+				Button btnConfiguration = new Button(sashFormBottomL, SWT.NONE);
+				btnConfiguration.setText("Configuration");
+		sashFormBottomL.setWeights(new int[] {1, 1, 1, 1, 1});
 		sashForm_lower.setWeights(new int[] {5, 1});
 		// bottom end
 		

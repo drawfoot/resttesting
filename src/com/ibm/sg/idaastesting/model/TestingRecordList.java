@@ -7,7 +7,7 @@ import java.util.List;
 public class TestingRecordList {
 	private List<TestingRecord> models;
 	public TestingRecordList() {
-		models = new LinkedList<TestingRecord>();
+		models = new LinkedList<TestingRecord>();		
 	}
 	public List<TestingRecord> getModel() {
 		return models;

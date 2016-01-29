@@ -45,13 +45,14 @@ public class RTCellModifier implements ICellModifier {
 	@Override
 	public void modify(Object element, String property, Object value) {
 	    if (element instanceof Item) element = ((Item) element).getData();
-
+	    
+	    /*
 	    TestingRecord p = (TestingRecord) element;
 	    if (URL.equals(property))
 	      p.setUrl((String) value);
 
 	    viewer.refresh();
-		
+		*/
 	}
 
 }
