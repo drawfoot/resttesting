@@ -42,6 +42,14 @@ public class AppWindow extends ApplicationWindow {
 	private String DEFAULT_URL = "http://localhost:9080/com.ibm.security.access.idaas.rest.services";
 	private String DEFAULT_TENANT = "1.wga1.ibmcloudsecurity.com";
 	
+	//TODO: support for method POST, PUT and GET
+	//TODO: GUI no responding if the network hang when running test, 
+	//TODO: filter and sorting
+	//TODO: export xsl and report graph
+	//TODO: scripts manager
+	//TODO: failure status highlight in result table
+	
+	
 	/**
 	 * Create the application window,
 	 */

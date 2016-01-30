@@ -39,7 +39,7 @@ public class RTCellModifier implements ICellModifier {
 	      return record.getUrl();
 	    else if(HEAD.equals(property))
 	    	return record.getHead();
-		return null;
+		return "";
 	}
 
 	@Override
