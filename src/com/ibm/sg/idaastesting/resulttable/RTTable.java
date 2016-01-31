@@ -1,26 +1,18 @@
 package com.ibm.sg.idaastesting.resulttable;
 
 import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.CellNavigationStrategy;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
-import org.eclipse.jface.viewers.FocusCellOwnerDrawHighlighter;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.jface.viewers.TextCellEditor;
-import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
@@ -31,8 +23,10 @@ public class RTTable {
 	private Composite parent;
 	private int style;
 	private TestingRecordList tableModel;
-	CheckboxTableViewer viewer;
-	
+	private CheckboxTableViewer viewer;
+	@SuppressWarnings("unused")
+	private RTSorter sorter;	
+
 	public RTTable(Composite parent, int style, TestingRecordList tableModel) {
 		this.parent = parent;
 		this.style = style;
@@ -51,19 +45,18 @@ public class RTTable {
 		Table table = viewer.getTable();
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
-		
-		int columnNum = 9;
-	    CellEditor[] editors = new CellEditor[columnNum];
-		for(int i = 0; i < columnNum; i++) {
+
+	    CellEditor[] editors = new CellEditor[RTColumnInfo.COL_COUNT];
+		for(int i = 0; i < RTColumnInfo.COL_COUNT; i++) {
 			TableViewerColumn newTableViewerColumn = new TableViewerColumn(
 					viewer, SWT.NONE);
 			TableColumn tblclmnNewColumn = newTableViewerColumn.getColumn();
 			tblclmnNewColumn.setWidth(100);
-			tblclmnNewColumn.setText(RTCellModifier.PROPS[i]);
+			tblclmnNewColumn.setText(RTColumnInfo.COL_PROPS[i]);
 		    editors[i] = new TextCellEditor(table);
 		}
 
-		viewer.setColumnProperties(RTCellModifier.PROPS);
+		viewer.setColumnProperties(RTColumnInfo.COL_PROPS);
 		viewer.setCellModifier(new RTCellModifier(viewer));
 		viewer.setCellEditors(editors);
 	    
@@ -72,6 +65,7 @@ public class RTTable {
 		viewer.setInput(tableModel.getModel());
 
 		addCellNavigation(viewer);
+		sorter = new RTSorter(viewer);
 	}
 
 	private void addCellNavigation(final CheckboxTableViewer tableViewer) {
@@ -80,6 +74,7 @@ public class RTTable {
 
 		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(
 				tableViewer) {
+			@Override
 			protected boolean isEditorActivationEvent(
 					ColumnViewerEditorActivationEvent event) {
 				return event.eventType == ColumnViewerEditorActivationEvent.MOUSE_DOUBLE_CLICK_SELECTION
@@ -99,6 +94,7 @@ public class RTTable {
 		// Used to override the default TAB behavior which focuses on the next
 		// component
 		tableViewer.getTable().addTraverseListener(new TraverseListener() {
+			@Override
 			public void keyTraversed(TraverseEvent arg0) {
 				if (arg0.keyCode == SWT.TAB) {
 					arg0.doit = false;

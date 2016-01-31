@@ -22,23 +22,27 @@ public class RTLabelProvider extends LabelProvider implements ITableLabelProvide
 		}
 		TestingRecord model = (TestingRecord) element;
 		switch (columnIndex) {
-		case 0:
+		case RTColumnInfo.COL_IDX_NO:
 			return model.getNo();
-		case 1:
+		case RTColumnInfo.COL_IDX_METHOD:
 			return model.getMethod();
-		case 2:
+		case RTColumnInfo.COL_IDX_STATUS:
+			return model.getStatus();
+		case RTColumnInfo.COL_IDX_SEVERITY:
+			return model.getSeverity();
+		case RTColumnInfo.COL_IDX_EXPCODE:
 			return model.getExpectedStatus();
-		case 3:
+		case RTColumnInfo.COL_IDX_EXPMSG:
 			return model.getExpectedMsg();
-		case 4:			
+		case RTColumnInfo.COL_IDX_ACTCODE:			
 			return model.getActualStatus();
-		case 5:
+		case RTColumnInfo.COL_IDX_ACTMSG:
 			return model.getActualMsg();
-		case 6:
+		case RTColumnInfo.COL_IDX_URL:
 			return model.getUrl();
-		case 7:
+		case RTColumnInfo.COL_IDX_HEAD:
 			return model.getHead();			
-		case 8:
+		case RTColumnInfo.COL_IDX_DATA:
 			return model.getData();	
 		default:
 			break;

@@ -1,7 +1,6 @@
 package com.ibm.sg.idaastesting;
 
 import java.util.HashMap;
-import java.util.List;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.ApplicationWindow;
@@ -22,7 +21,7 @@ import org.eclipse.swt.events.SelectionEvent;
 
 import com.ibm.sg.idaastesting.model.TestingRecordList;
 import com.ibm.sg.idaastesting.model.TestingRecord;
-import com.ibm.sg.idaastesting.resulttable.RTCellModifier;
+import com.ibm.sg.idaastesting.resulttable.RTColumnInfo;
 import com.ibm.sg.idaastesting.resulttable.RTTable;
 import com.ibm.sg.idaastesting.util.RestHttpClient;
 import com.ibm.sg.idaastesting.util.RestRequest;
@@ -94,9 +93,9 @@ public class AppWindow extends ApplicationWindow {
 		textViewer.getTextWidget().setText(
 				"35.11.1.1|DELETE|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=description=ACE25-description|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"ACE1-user\",\"iv-groups\":\"ACE-group1\"}|204||1|(ˆ$) \n" +
 				"35.11.1.2|DELETE|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=description=[ACE25-description]|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"ACE1-user\",\"iv-groups\":\"ACE-group1\"}|204||1|(ˆ$) \n" +
-				"35.11.2.1|DELETE|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=description=ACE5-description|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"ACE1-user\",\"iv-groups\":\"ACE-group1,ACE-group2\"}|204||1|(ˆ$)\n" +
-				"35.11.2.2|DELETE|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=description=[ACE5-description]|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"ACE1-user\",\"iv-groups\":\"ACE-group1,ACE-group2\"}|204||1|(ˆ$)\n" +
 				"35.11.3.1|DELETE|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=description=ACE13-description|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"randomUsr\",\"iv-groups\":\"ACE-group1\"}|204||1|(ˆ$) \n" +
+				"35.11.2.1|DELETE|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=description=ACE5-description|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"ACE1-user\",\"iv-groups\":\"ACE-group1,ACE-group2\"}|204||1|(ˆ$)\n" +
+				"35.11.2.2|DELETE|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=description=[ACE5-description]|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"ACE1-user\",\"iv-groups\":\"ACE-group1,ACE-group2\"}|204||1|(ˆ$)\n" +				
 				"35.11.3.2|DELETE|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=description=[ACE13-description]|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"randomUsr\",\"iv-groups\":\"ACE-group1\"}|204||1|(ˆ$)");
 				
 				// upper right
@@ -286,7 +285,7 @@ public class AppWindow extends ApplicationWindow {
 									.getStatusCode()));
 							data.setActualMsg(response.getBody());
 							resultTable.getViewer().update(data,
-									RTCellModifier.PROPS);						
+									RTColumnInfo.COL_PROPS);						
 						}
 					} // run
 				}); // Runnable

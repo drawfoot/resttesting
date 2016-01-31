@@ -13,7 +13,8 @@ public class TestingRecord {
 
 	private String user;
 	private String pass;
-	private String tenant;
+	private String status;
+	private String severity;
 
 	public TestingRecord(String no, String method) {
 		this.no = no;
@@ -94,12 +95,19 @@ public class TestingRecord {
 		this.pass = pass;
 	}
 
-	public String getTenant() {
-		return tenant;
+	public String getStatus() {
+		return status;
 	}
 
-	public void setTenant(String tenant) {
-		this.tenant = tenant;
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
+	public String getSeverity() {
+		return severity;
+	}
+
+	public void setSeverity(String severity) {
+		this.severity = severity;
+	}
 }
