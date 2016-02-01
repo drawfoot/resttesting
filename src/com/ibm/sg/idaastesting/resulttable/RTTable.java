@@ -5,6 +5,7 @@ import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
+import org.eclipse.jface.viewers.DialogCellEditor;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
@@ -13,6 +14,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Dialog;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
@@ -42,7 +46,7 @@ public class RTTable {
 
 		viewer = CheckboxTableViewer
 				.newCheckList(parent, style);
-		Table table = viewer.getTable();
+		final Table table = viewer.getTable();
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
 
@@ -53,7 +57,11 @@ public class RTTable {
 			TableColumn tblclmnNewColumn = newTableViewerColumn.getColumn();
 			tblclmnNewColumn.setWidth(100);
 			tblclmnNewColumn.setText(RTColumnInfo.COL_PROPS[i]);
-		    editors[i] = new TextCellEditor(table);
+			if(i==RTColumnInfo.COL_IDX_ACTMSG) {
+			    editors[i] = new RTLongTextCellEditor(table);
+			} else {
+				editors[i] = new TextCellEditor(table);
+			}
 		}
 
 		viewer.setColumnProperties(RTColumnInfo.COL_PROPS);

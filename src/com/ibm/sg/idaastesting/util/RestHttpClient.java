@@ -1,5 +1,6 @@
 package com.ibm.sg.idaastesting.util;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -21,6 +22,8 @@ import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
+import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.commons.io.IOUtils;
 
 import com.ibm.json.java.OrderedJSONObject;
 
@@ -50,9 +53,33 @@ public class RestHttpClient {
 				break;
 			case RestRequest.METHOD_POST:
 				httpMethod = new PostMethod(url);
+				if (restRequest.getBody() != null) {
+					try {
+						((PostMethod) httpMethod)
+								.setRequestEntity(new StringRequestEntity(
+										restRequest.getBody(),
+										RestRequest.HEADER_VAL_APPLICATION_JSON,
+										"UTF-8"));
+					} catch (UnsupportedEncodingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 				break;
 			case RestRequest.METHOD_PUT:
 				httpMethod = new PutMethod(url);
+				if (restRequest.getBody() != null) {
+					try {
+						((PutMethod) httpMethod)
+								.setRequestEntity(new StringRequestEntity(
+										restRequest.getBody(),
+										RestRequest.HEADER_VAL_APPLICATION_JSON,
+										"UTF-8"));
+					} catch (UnsupportedEncodingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}				
 				break;
 			case RestRequest.METHOD_DELETE:
 				httpMethod = new DeleteMethod(url);
@@ -64,10 +91,10 @@ public class RestHttpClient {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
-		return doRequestImpl(restRequest, httpMethod);
+		return doRequest(restRequest, httpMethod);
 	}
 
-	private RestResponse doRequestImpl(RestRequest restRequest,
+	private RestResponse doRequest(RestRequest restRequest,
 			HttpMethodBase httpMethod) {
 
 		// add credentials
@@ -133,8 +160,8 @@ public class RestHttpClient {
 		restResponse.setStatusCode(httpMethod.getStatusCode());
 		restResponse.setStatusText(httpMethod.getStatusText());
 		restResponse.setHeaderMap(headerMap);
-		restResponse.setBody(httpMethod.getResponseBodyAsString());
-
+        String expmsg = IOUtils.toString(httpMethod.getResponseBodyAsStream(), "UTF-8");
+        restResponse.setBody(expmsg);
 		return restResponse;
 	}
 	

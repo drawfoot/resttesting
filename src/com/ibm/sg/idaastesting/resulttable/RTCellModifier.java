@@ -26,6 +26,8 @@ public class RTCellModifier implements ICellModifier {
 	    TestingRecord record = (TestingRecord) element;
 	    if (RTColumnInfo.URL.equals(property))
 	      return record.getUrl();
+	    else if(RTColumnInfo.ACTUALMSG.equals(property))
+	    	return record.getActualMsg();	    
 	    else if(RTColumnInfo.HEAD.equals(property))
 	    	return record.getHead();
 		return "";

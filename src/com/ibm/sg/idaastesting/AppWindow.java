@@ -95,7 +95,13 @@ public class AppWindow extends ApplicationWindow {
 				"35.11.1.2|DELETE|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=description=[ACE25-description]|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"ACE1-user\",\"iv-groups\":\"ACE-group1\"}|204||1|(ˆ$) \n" +
 				"35.11.3.1|DELETE|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=description=ACE13-description|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"randomUsr\",\"iv-groups\":\"ACE-group1\"}|204||1|(ˆ$) \n" +
 				"35.11.2.1|DELETE|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=description=ACE5-description|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"ACE1-user\",\"iv-groups\":\"ACE-group1,ACE-group2\"}|204||1|(ˆ$)\n" +
-				"35.11.2.2|DELETE|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=description=[ACE5-description]|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"ACE1-user\",\"iv-groups\":\"ACE-group1,ACE-group2\"}|204||1|(ˆ$)\n" +				
+				"35.11.2.2|DELETE|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=description=[ACE5-description]|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"ACE1-user\",\"iv-groups\":\"ACE-group1,ACE-group2\"}|204||1|(ˆ$)\n" +
+				"17.1.1.2|GET|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=appid=subjectid=ACE1-user#access=allow#return=appid|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"ACE1-user\",\"iv-groups\":\"admin\"}|200||1|ˆ\\[\\]$ \n" +
+				"17.3.3.3|GET|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=appid=[[appid],INVALID]#return=description|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"ACE1-user\",\"iv-groups\":\"admin\"}|200||3|\\[{[ˆ}]*},{[ˆ}]*}\\]\n" +
+				"26.1|POST|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces|admin|wrongPswd|{\"content-type\":\"application/json\",\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"ACE1-user\",\"iv-groups\":\"admin\"}|400|{}|1|{\"message\":\"Request body cannot be empty\"}\n"+
+				"26.2.2|POST|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces|admin|wrongPswd|{\"content-type\":\"application/json\",\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"ACE26.2.2-user\",\"iv-groups\":\"admin\"}|400|{\"appid\":\"[id]\",\"description\": \"ACE26.2.2-description\",\"subjecttype\": \"user\",\"subjectiiiiiiiid\": \"ACE26.2.2-user\",\"isowner\": true,\"access\": \"allow\", \"comment\":\"ACE26.2.2-comment\"} |1|{\"message\":\"Malformed JSON. No such attribute: \\\"subjectiiiiiiiid\\\"\"}\n"+
+				"13.3.4|PUT|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces/[id]|admin|wrongPswd|{\"content-type\":\"application/json\",\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"ACE1-user\",\"iv-groups\":\"admin\"}|400|{\"description\": \"ACE1-description\",\"isowner\": true,\"access\": \"allow1\",\"comment\": \"ACE1-comment-13.3.4\"}|3|{\"message\":\"Parameter is invalid: \\\"access\\\"\"}\n"+				
+				"13.7.3|PUT|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces/[id]|admin|wrongPswd|{\"content-type\":\"application/json\",\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"ACE1-user\",\"iv-groups\":\"admin\"}|400|{\"appid\":\"[appid]\"}|3|{\"message\":\"The value for \\\"appid\\\" cannot be changed\"}\n"+
 				"35.11.3.2|DELETE|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=description=[ACE13-description]|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"randomUsr\",\"iv-groups\":\"ACE-group1\"}|204||1|(ˆ$)");
 				
 				// upper right
@@ -176,7 +182,6 @@ public class AppWindow extends ApplicationWindow {
 		Combo combo = new Combo(sashFormBottomLFilter, SWT.NONE);
 		combo.setText("filter by");
 		sashFormBottomLFilter.setWeights(new int[] { 1, 1 });
-				
 						Button btnRunTestCases = new Button(sashFormBottomL, SWT.NONE);
 						btnRunTestCases.addSelectionListener(new SelectionAdapter() {
 							@Override
@@ -220,7 +225,7 @@ public class AppWindow extends ApplicationWindow {
 	 */
 	@Override
 	protected Point getInitialSize() {
-		return new Point(705, 479);
+		return new Point(800, 600);
 	}
 
 	public Thread getParseScriptsTask() {
@@ -279,11 +284,15 @@ public class AppWindow extends ApplicationWindow {
 							HashMap<String, String> headers = getHeader(data.getHead());
 							restRequest.setHeaderMap(headers);
 							RestResponse response;
-
-							response = httpclient.doRequest(restRequest);
-							data.setActualStatus(String.valueOf(response
-									.getStatusCode()));
-							data.setActualMsg(response.getBody());
+							try {
+								response = httpclient.doRequest(restRequest);
+								data.setActualStatus(String.valueOf(response
+										.getStatusCode()));
+								data.setActualMsg(response.getBody());								
+							} catch (Exception e) {
+								data.setStatus("Execution Error:" + e.getMessage());
+							}
+							
 							resultTable.getViewer().update(data,
 									RTColumnInfo.COL_PROPS);						
 						}
@@ -295,35 +304,18 @@ public class AppWindow extends ApplicationWindow {
 
 	void parseRecord(String str, TestingRecord record) {
 		String[] parts = str.split("\\|");
-		if(parts[1].equals("DELETE")) {
-			parseRecordDelete(parts, record);
-		}
-	}
-
-	// no.0|delete1|host2|lmi3|url4|user5|pass6|header7|expect_sc8|9|number(?)10|expect msg11
-	void parseRecordDelete(String[] parts, TestingRecord record) {	
 		record.setNo(parts[0]);
 		record.setMethod(parts[1]);		
-		record.setUrl(parts[4].replaceAll("\\/v1\\/mgmt\\/idaas",DEFAULT_URL).replaceAll("#", "|"));
 		record.setUser(parts[5]);
 		record.setPass(parts[6]);
-		record.setHead(parts[7].replaceAll("\\[tenant\\]", DEFAULT_TENANT));
 		record.setExpectedStatus(parts[8]);
 		record.setExpectedMsg(parts[11]);
+		record.setUrl(parts[4].replaceAll("\\/v1\\/mgmt\\/idaas",DEFAULT_URL).replaceAll("#", "|"));		
+		record.setHead(parts[7].replaceAll("\\[tenant\\]", DEFAULT_TENANT));
+		record.setData(parts[9]);
 	}
 
-	void parseRecordGET(String[] parts, TestingRecord record) {
-		//TODO
-	}
-
-	void parseRecorPUT(String[] parts, TestingRecord record) {
-		//TODO
-	}
-
-	void parseRecordPOST(String[] parts, TestingRecord record) {
-		//TODO
-	}
-
+	//TODO: move to another class
 	private HashMap<String, String> getHeader(String headerstr) {
 		HashMap<String, String> headers = new HashMap<String, String>();
 		String[] entries = trimFirstAndLast(headerstr, "{", "}").split(",");
@@ -345,6 +337,7 @@ public class AppWindow extends ApplicationWindow {
 		return headers;
 	}
 
+    //TODO: move to util class		
 	private String trimFirstAndLast(String str, String lch, String rch) {
 		if(str == null)
 			return null;
