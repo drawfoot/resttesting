@@ -5,7 +5,6 @@ import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
-import org.eclipse.jface.viewers.DialogCellEditor;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
@@ -14,46 +13,32 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Dialog;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
 import com.ibm.sg.idaastesting.model.TestingRecordList;
 
 
-public class RTTable {
-	private Composite parent;
-	private int style;
+public class RTTable extends CheckboxTableViewer{
 	private TestingRecordList tableModel;
-	private CheckboxTableViewer viewer;
 	@SuppressWarnings("unused")
 	private RTSorter sorter;	
 
 	public RTTable(Composite parent, int style, TestingRecordList tableModel) {
-		this.parent = parent;
-		this.style = style;
+		super(createTable(parent, style));
 		this.tableModel = tableModel;
 		build();
 	}
 
-	public CheckboxTableViewer getViewer() {
-		return viewer;
-	}
-
 	public void build() {
-
-		viewer = CheckboxTableViewer
-				.newCheckList(parent, style);
-		final Table table = viewer.getTable();
+		final Table table = getTable();
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
 
 	    CellEditor[] editors = new CellEditor[RTColumnInfo.COL_COUNT];
 		for(int i = 0; i < RTColumnInfo.COL_COUNT; i++) {
 			TableViewerColumn newTableViewerColumn = new TableViewerColumn(
-					viewer, SWT.NONE);
+					this, SWT.NONE);
 			TableColumn tblclmnNewColumn = newTableViewerColumn.getColumn();
 			tblclmnNewColumn.setWidth(100);
 			tblclmnNewColumn.setText(RTColumnInfo.COL_PROPS[i]);
@@ -64,16 +49,16 @@ public class RTTable {
 			}
 		}
 
-		viewer.setColumnProperties(RTColumnInfo.COL_PROPS);
-		viewer.setCellModifier(new RTCellModifier(viewer));
-		viewer.setCellEditors(editors);
+		this.setColumnProperties(RTColumnInfo.COL_PROPS);
+		this.setCellModifier(new RTCellModifier(this));
+		this.setCellEditors(editors);
 	    
-		viewer.setContentProvider(new RTContentProvider());
-		viewer.setLabelProvider(new RTLabelProvider());
-		viewer.setInput(tableModel.getModel());
+		this.setContentProvider(new RTContentProvider());
+		this.setLabelProvider(new RTLabelProvider());
+		this.setInput(tableModel.getModel());
 
-		addCellNavigation(viewer);
-		sorter = new RTSorter(viewer);
+		addCellNavigation(this);
+		sorter = new RTSorter(this);
 	}
 
 	private void addCellNavigation(final CheckboxTableViewer tableViewer) {
@@ -112,7 +97,7 @@ public class RTTable {
 	}
 
 	public void adjustColumnWidth() {
-        Table table = this.getViewer().getTable();
+        Table table = getTable();
         for (TableColumn tc : table.getColumns())
             tc.pack();      
 	}
