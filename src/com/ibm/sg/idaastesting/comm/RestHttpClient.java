@@ -1,4 +1,4 @@
-package com.ibm.sg.idaastesting.util;
+package com.ibm.sg.idaastesting.comm;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

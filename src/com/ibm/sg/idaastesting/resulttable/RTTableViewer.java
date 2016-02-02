@@ -17,20 +17,26 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
 
-public class RTTableViewer extends CheckboxTableViewer{
+public class RTTableViewer{
 	@SuppressWarnings("unused")
 	private RTSorter sorter;	
+	CheckboxTableViewer viewer;
 
 	public RTTableViewer(Composite parent, int style) {
-		super(createTable(parent, style));
+		viewer = CheckboxTableViewer.newCheckList(parent, style);
+		build();
 	}
 
-	public void build() {
-		final Table table = getTable();
+	public CheckboxTableViewer getViewer() {
+		return viewer;
+	}
+	
+	private void build() {
+		final Table table = viewer.getTable();
 	    CellEditor[] editors = new CellEditor[RTColumnInfo.COL_COUNT];
 		for(int i = 0; i < RTColumnInfo.COL_COUNT; i++) {
 			TableViewerColumn newTableViewerColumn = new TableViewerColumn(
-					this, SWT.NONE);
+					viewer, SWT.NONE);
 			TableColumn tblclmnNewColumn = newTableViewerColumn.getColumn();
 			tblclmnNewColumn.setWidth(100);
 			tblclmnNewColumn.setText(RTColumnInfo.COL_PROPS[i]);
@@ -43,15 +49,15 @@ public class RTTableViewer extends CheckboxTableViewer{
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
 		
-		this.setColumnProperties(RTColumnInfo.COL_PROPS);
-		this.setCellModifier(new RTCellModifier(this));
-		this.setCellEditors(editors);
+		viewer.setColumnProperties(RTColumnInfo.COL_PROPS);
+		viewer.setCellModifier(new RTCellModifier(viewer));
+		viewer.setCellEditors(editors);
 	    
-		this.setContentProvider(new RTContentProvider());
-		this.setLabelProvider(new RTLabelProvider());
+		viewer.setContentProvider(new RTContentProvider());
+		viewer.setLabelProvider(new RTLabelProvider());
 
-		addCellNavigation(this);
-		sorter = new RTSorter(this);
+		addCellNavigation(viewer);
+		sorter = new RTSorter(viewer);
 	}
 
 	private void addCellNavigation(final CheckboxTableViewer tableViewer) {
@@ -90,7 +96,7 @@ public class RTTableViewer extends CheckboxTableViewer{
 	}
 
 	public void adjustColumnWidth() {
-        Table table = getTable();
+        Table table = viewer.getTable();
         for (TableColumn tc : table.getColumns())
             tc.pack();      
 	}
