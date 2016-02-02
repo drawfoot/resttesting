@@ -33,7 +33,6 @@ import sun.security.krb5.Config;
 public class ConfigDialog extends Dialog {
 	private Text textHost;
 	private Text textTenant1;
-	private Text text_2;
 	private Text textTenant2;
 	private Text textAppId;
 	private Button btnRadioRemote;
@@ -112,16 +111,6 @@ public class ConfigDialog extends Dialog {
 		    textAppId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		    new Label(container, SWT.NONE);
 		    
-		    Label lblId = new Label(container, SWT.NONE);
-		    lblId.setSize(11, 15);
-		    lblId.setText("ID");
-		    
-		    text_2 = new Text(container, SWT.BORDER);
-		    text_2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-		    
-		    Combo combo = new Combo(container, SWT.NONE);
-		    combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-		    
 		    // init dialogs
 		    readConfig();
 
@@ -188,7 +177,7 @@ public class ConfigDialog extends Dialog {
 		    	textTenant1.setText(tenant1);
 		    String tenant2 = prop.getProperty(IdaasTestingConfig.CFG_TENANT2);
 		    if( tenant2!=null) 
-		    	textTenant2.setText(tenant1);
+		    	textTenant2.setText(tenant2);
 		    
 		    // appid
 		    String appid = prop.getProperty(IdaasTestingConfig.CFG_APPID);

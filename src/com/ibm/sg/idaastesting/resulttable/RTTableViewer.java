@@ -1,34 +1,52 @@
 package com.ibm.sg.idaastesting.resulttable;
 
+import javax.management.Descriptor;
+
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
+import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.ICheckStateProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+
+import com.ibm.sg.idaastesting.model.TestingRecord;
+import com.ibm.sg.idaastesting.model.TestingRecordList;
 
 
 public class RTTableViewer{
 	@SuppressWarnings("unused")
 	private RTSorter sorter;	
 	CheckboxTableViewer viewer;
-
-	public RTTableViewer(Composite parent, int style) {
+	RTFilter filter = new RTFilter();
+	TestingRecordList recList;
+	
+	public RTTableViewer(Composite parent, int style, TestingRecordList recList) {
 		viewer = CheckboxTableViewer.newCheckList(parent, style);
+		this.recList = recList;
 		build();
 	}
 
 	public CheckboxTableViewer getViewer() {
 		return viewer;
+	}
+	
+	public RTFilter getFilter() {
+		return filter;
 	}
 	
 	private void build() {
@@ -57,7 +75,28 @@ public class RTTableViewer{
 		viewer.setLabelProvider(new RTLabelProvider());
 
 		addCellNavigation(viewer);
+		addCheckStateProvider(viewer);
 		sorter = new RTSorter(viewer);
+		viewer.addFilter(filter);		
+		viewer.setInput(recList.getModel());			
+	}
+	public void adjustColumnWidth() {
+        Table table = viewer.getTable();
+        for (TableColumn tc : table.getColumns())
+            tc.pack();      
+	}
+	
+	public void checkAll(boolean checked) {
+		TableItem[] items = viewer.getTable().getItems();
+		for (TableItem item : items) {
+			((TestingRecord)item.getData()).setChecked(checked);
+			viewer.setChecked(item.getData(), checked);
+		}
+	}
+	
+	public void setChecked(Object element, boolean checked) {
+		((TestingRecord)element).setChecked(checked);
+		viewer.setChecked(element, checked);
 	}
 
 	private void addCellNavigation(final CheckboxTableViewer tableViewer) {
@@ -95,9 +134,26 @@ public class RTTableViewer{
 		});
 	}
 
-	public void adjustColumnWidth() {
-        Table table = viewer.getTable();
-        for (TableColumn tc : table.getColumns())
-            tc.pack();      
+	private void addCheckStateProvider(final CheckboxTableViewer tableViewer) {
+		tableViewer.setCheckStateProvider(new ICheckStateProvider() {
+			@Override
+			public boolean isGrayed(final Object element) {
+				return false;
+			}
+
+			@Override
+			public boolean isChecked(final Object element) {
+				return ((TestingRecord) element).isChecked();
+			}
+		});
+		tableViewer.addCheckStateListener(new ICheckStateListener() {
+			@Override
+			public void checkStateChanged(final CheckStateChangedEvent event) {
+				((TestingRecord) event.getElement()).setChecked(event
+						.getChecked());
+			}
+		});
 	}
+
+
 }

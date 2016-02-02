@@ -15,6 +15,7 @@ public class TestingRecord {
 	private String pass;
 	private String status;
 	private String severity;
+	private boolean checked;
 
 	public static final String STATUS_PARSING = "parsing";
 	public static final String STATUS_PARSED = "parsed";
@@ -24,9 +25,8 @@ public class TestingRecord {
 	public static final String STATUS_RUN_SUCCESS = "run successful";
 	public static final String STATUS_RUN_FAILED = "run failed";	
 
-	public TestingRecord(String no, String method) {
-		this.no = no;
-		this.method = method;
+	public TestingRecord() {
+		this.checked = true;
 	}
 	
 	public String getNo() {
@@ -118,4 +118,13 @@ public class TestingRecord {
 	public void setSeverity(String severity) {
 		this.severity = severity;
 	}
+
+	public boolean isChecked() {
+		return checked;
+	}
+
+	public void setChecked(boolean checked) {
+		this.checked = checked;
+	}
+	
 }
