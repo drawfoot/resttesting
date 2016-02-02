@@ -16,25 +16,17 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
-import com.ibm.sg.idaastesting.model.TestingRecordList;
 
-
-public class RTTable extends CheckboxTableViewer{
-	private TestingRecordList tableModel;
+public class RTTableViewer extends CheckboxTableViewer{
 	@SuppressWarnings("unused")
 	private RTSorter sorter;	
 
-	public RTTable(Composite parent, int style, TestingRecordList tableModel) {
+	public RTTableViewer(Composite parent, int style) {
 		super(createTable(parent, style));
-		this.tableModel = tableModel;
-		build();
 	}
 
 	public void build() {
 		final Table table = getTable();
-		table.setLinesVisible(true);
-		table.setHeaderVisible(true);
-
 	    CellEditor[] editors = new CellEditor[RTColumnInfo.COL_COUNT];
 		for(int i = 0; i < RTColumnInfo.COL_COUNT; i++) {
 			TableViewerColumn newTableViewerColumn = new TableViewerColumn(
@@ -48,14 +40,15 @@ public class RTTable extends CheckboxTableViewer{
 				editors[i] = new TextCellEditor(table);
 			}
 		}
-
+		table.setLinesVisible(true);
+		table.setHeaderVisible(true);
+		
 		this.setColumnProperties(RTColumnInfo.COL_PROPS);
 		this.setCellModifier(new RTCellModifier(this));
 		this.setCellEditors(editors);
 	    
 		this.setContentProvider(new RTContentProvider());
 		this.setLabelProvider(new RTLabelProvider());
-		this.setInput(tableModel.getModel());
 
 		addCellNavigation(this);
 		sorter = new RTSorter(this);

@@ -16,6 +16,14 @@ public class TestingRecord {
 	private String status;
 	private String severity;
 
+	public static final String STATUS_PARSING = "parsing";
+	public static final String STATUS_PARSED = "parsed";
+	public static final String STATUS_PARSE_ERROR = "parse error";
+	public static final String STATUS_RUNNING = "running";
+	public static final String STATUS_RUN_ERROR = "run error";
+	public static final String STATUS_RUN_SUCCESS = "run successful";
+	public static final String STATUS_RUN_FAILED = "run failed";	
+
 	public TestingRecord(String no, String method) {
 		this.no = no;
 		this.method = method;

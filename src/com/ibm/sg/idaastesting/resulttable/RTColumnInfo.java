@@ -2,7 +2,7 @@ package com.ibm.sg.idaastesting.resulttable;
 
 public class RTColumnInfo {
 
-	public static final String NUM = "num";
+	public static final String NUM = "no.";
 	public static final String METHOD = "method";
 	public static final String STATUS = "status";
 	public static final String SEVERITY = "severity";	

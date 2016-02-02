@@ -1,7 +1,10 @@
 package com.ibm.sg.idaastesting;
 
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.Properties;
 
+import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
@@ -21,10 +24,11 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 
 import com.ibm.sg.idaastesting.config.ConfigDialog;
+import com.ibm.sg.idaastesting.model.IdaasTestingConfig;
 import com.ibm.sg.idaastesting.model.TestingRecordList;
 import com.ibm.sg.idaastesting.model.TestingRecord;
 import com.ibm.sg.idaastesting.resulttable.RTColumnInfo;
-import com.ibm.sg.idaastesting.resulttable.RTTable;
+import com.ibm.sg.idaastesting.resulttable.RTTableViewer;
 import com.ibm.sg.idaastesting.util.RestHttpClient;
 import com.ibm.sg.idaastesting.util.RestRequest;
 import com.ibm.sg.idaastesting.util.RestResponse;
@@ -34,23 +38,31 @@ import org.eclipse.wb.swt.SWTResourceManager;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.layout.TableColumnLayout;
 
 public class AppWindow extends ApplicationWindow {
 	private TestingRecordList recordList = new TestingRecordList();
 	private TextViewer textViewer;
-	private RTTable resultTable;
+	private RTTableViewer resultTableViewer;
 	private RestHttpClient httpclient = new RestHttpClient();
 
 	// TODO: configuration
 	private String DEFAULT_URL = "http://localhost:9080/com.ibm.security.access.idaas.rest.services";
 	private String DEFAULT_TENANT = "1.wga1.ibmcloudsecurity.com";
+	private Table table;
 
-	// TODO: support for method POST, PUT and GET
-	// TODO: GUI no responding if the network hang when running test,
-	// TODO: filter and sorting
+	// TODO: performance and user experience GUI no responding if the network
+	// hang when running test,
+	// TODO: failure status highlight in result table
+	// TODO: configuration enhance and ids config
+	// TODO: filtering
+	// TODO: packaging
+
+	// TODO: application state save
 	// TODO: export xsl and report graph
 	// TODO: scripts manager
-	// TODO: failure status highlight in result table
 
 	/**
 	 * Create the application window,
@@ -82,8 +94,8 @@ public class AppWindow extends ApplicationWindow {
 
 		// upper
 		SashForm sashForm_upper = new SashForm(grpTestingScripts, SWT.NONE);
-
-		// upper left
+		
+		// Script Viewer
 		textViewer = new TextViewer(sashForm_upper, SWT.BORDER | SWT.MULTI
 				| SWT.H_SCROLL | SWT.V_SCROLL);
 		textViewer
@@ -102,39 +114,41 @@ public class AppWindow extends ApplicationWindow {
 								+ "13.7.3|PUT|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces/[id]|admin|wrongPswd|{\"content-type\":\"application/json\",\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"ACE1-user\",\"iv-groups\":\"admin\"}|400|{\"appid\":\"[appid]\"}|3|{\"message\":\"The value for \\\"appid\\\" cannot be changed\"}\n"
 								+ "35.11.3.2|DELETE|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=description=[ACE13-description]|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"randomUsr\",\"iv-groups\":\"ACE-group1\"}|204||1|(ˆ$)");
 		sashForm_upper.setWeights(new int[] { 550 });
-		// upper end
-
-		// bottom
-		Group grpParsedTestCases = new Group(sashForm, SWT.NONE);
-		grpParsedTestCases.setText("Parsed Scripts and Run Results");
-		grpParsedTestCases.setLayout(new FillLayout(SWT.VERTICAL));
-		SashForm sashForm_lower = new SashForm(grpParsedTestCases, SWT.VERTICAL);
-
-		// bottom upper
-		resultTable = new RTTable(sashForm_lower, SWT.BORDER
-				| SWT.FULL_SELECTION | SWT.MULTI, recordList);
-
-		// bottom lower
-		SashForm sashFormBottomL = new SashForm(sashForm_lower, SWT.HORIZONTAL);
 		
-				// upper right
-				Button btnParseTestingScripts = new Button(sashFormBottomL, SWT.NONE);
-				btnParseTestingScripts.addSelectionListener(new SelectionAdapter() {
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						getParseScriptsTask().start();
-					}
-				});
-				btnParseTestingScripts.setText("Parse");
+/*		Composite composite = new Composite(sashForm, SWT.NONE);
+		composite.setLayout(new TableColumnLayout());*/
+
+		// Middle
+//		Group grpParsedTestCases = new Group(sashForm, SWT.NONE);
+//		grpParsedTestCases.setText("Parsed Scripts and Run Results");
+//		grpParsedTestCases.setLayout(new FillLayout(SWT.VERTICAL));
+		//grpParsedTestCases.setLayout(new TableColumnLayout());
+		resultTableViewer = new RTTableViewer(sashForm, SWT.BORDER
+				| SWT.FULL_SELECTION | SWT.MULTI);
+		resultTableViewer.build();
+		resultTableViewer.setInput(recordList.getModel());
+
+		// Bottom
+		SashForm sashForm_lower = new SashForm(sashForm, SWT.VERTICAL);
+		SashForm sashFormBottomL = new SashForm(sashForm_lower, SWT.HORIZONTAL);
+
+		Button btnParseTestingScripts = new Button(sashFormBottomL, SWT.NONE);
+		btnParseTestingScripts.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				getParseScriptsTask().start();
+			}
+		});
+		btnParseTestingScripts.setText("Parse");
 		final Button btnCheckAll = new Button(sashFormBottomL, SWT.BORDER
 				| SWT.FLAT | SWT.CHECK | SWT.CENTER);
 		btnCheckAll.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (btnCheckAll.getSelection() == true)
-					resultTable.setAllChecked(true);
+					resultTableViewer.setAllChecked(true);
 				else
-					resultTable.setAllChecked(false);
+					resultTableViewer.setAllChecked(false);
 			}
 		});
 		btnCheckAll.setSelection(true);
@@ -146,10 +160,10 @@ public class AppWindow extends ApplicationWindow {
 		btnCheckSelected.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				IStructuredSelection selection = (IStructuredSelection) resultTable
+				IStructuredSelection selection = (IStructuredSelection) resultTableViewer
 						.getSelection();
 				for (Object element : selection.toArray()) {
-					resultTable.setChecked(element, true);
+					resultTableViewer.setChecked(element, true);
 				}
 			}
 		});
@@ -159,26 +173,26 @@ public class AppWindow extends ApplicationWindow {
 		btnUncheckSelected.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				IStructuredSelection selection = (IStructuredSelection) resultTable
+				IStructuredSelection selection = (IStructuredSelection) resultTableViewer
 						.getSelection();
 				for (Object element : selection.toArray()) {
-					resultTable.setChecked(element, false);
+					resultTableViewer.setChecked(element, false);
 				}
 			}
 		});
 		btnUncheckSelected.setText("Uncheck Selected");
 		sashForm_1.setWeights(new int[] { 1, 1 });
-				
-						Button btnConfiguration = new Button(sashFormBottomL, SWT.NONE);
-						btnConfiguration.addSelectionListener(new SelectionAdapter() {
-							@Override
-							public void widgetSelected(SelectionEvent e) {
-								ConfigDialog dialog = new ConfigDialog(getShell());
-								dialog.create();
-								dialog.open();
-							}
-						});
-						btnConfiguration.setText("Configuration");
+
+		Button btnConfiguration = new Button(sashFormBottomL, SWT.NONE);
+		btnConfiguration.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ConfigDialog dialog = new ConfigDialog(getShell());
+				dialog.create();
+				dialog.open();
+			}
+		});
+		btnConfiguration.setText("Configuration");
 		Button btnRunTestCases = new Button(sashFormBottomL, SWT.NONE);
 		btnRunTestCases.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -187,11 +201,6 @@ public class AppWindow extends ApplicationWindow {
 			}
 		});
 		btnRunTestCases.setText("Run");
-		sashFormBottomL.setWeights(new int[] { 1, 1, 1, 1, 1 });
-		sashForm_lower.setWeights(new int[] { 311, 43 });
-		// bottom end
-
-		sashForm.setWeights(new int[] {10, 20});
 
 		return container;
 	}
@@ -219,7 +228,7 @@ public class AppWindow extends ApplicationWindow {
 	 */
 	@Override
 	protected Point getInitialSize() {
-		return new Point(800, 600);
+		return new Point(682, 524);
 	}
 
 	public Thread getParseScriptsTask() {
@@ -231,7 +240,7 @@ public class AppWindow extends ApplicationWindow {
 					public void run() {
 						// clear old data
 						recordList.reset();
-						resultTable.refresh();
+						resultTableViewer.refresh();
 
 						StyledText recordsText = textViewer.getTextWidget();
 						int totallines = recordsText.getLineCount();
@@ -245,10 +254,10 @@ public class AppWindow extends ApplicationWindow {
 							TestingRecord record = new TestingRecord(null, null);
 							parseRecord(line, record);
 							recordList.addTestingRecord(record);
-							resultTable.add(record);
+							resultTableViewer.add(record);
 						}// while
-						resultTable.adjustColumnWidth();
-						resultTable.setAllChecked(true);
+						resultTableViewer.adjustColumnWidth();
+						resultTableViewer.setAllChecked(true);
 					} // run
 				}); // Runnable
 			}// run
@@ -262,9 +271,7 @@ public class AppWindow extends ApplicationWindow {
 				Display.getDefault().asyncExec(new Runnable() {
 					@Override
 					public void run() {
-						// TableItem[] items =
-						// resultTable.getViewer().getTable().getItems();
-						Object[] items = resultTable.getCheckedElements();
+						Object[] items = resultTableViewer.getCheckedElements();
 						for (Object item : items) {
 							TestingRecord data = (TestingRecord) item;
 							if (data.getNo() == null)
@@ -286,12 +293,20 @@ public class AppWindow extends ApplicationWindow {
 								data.setActualStatus(String.valueOf(response
 										.getStatusCode()));
 								data.setActualMsg(response.getBody());
+								// status update
+								if (data.getExpectedStatus().equals(
+										response.getStatusCode())) {
+									data.setStatus(TestingRecord.STATUS_RUN_SUCCESS);
+								} else {
+									data.setStatus(TestingRecord.STATUS_RUN_FAILED);
+								}
 							} catch (Exception e) {
-								data.setStatus("Execution Error:"
+								data.setStatus(TestingRecord.STATUS_RUN_ERROR
 										+ e.getMessage());
 							}
 
-							resultTable.update(data, RTColumnInfo.COL_PROPS);
+							resultTableViewer.update(data,
+									RTColumnInfo.COL_PROPS);
 						}
 					} // run
 				}); // Runnable
@@ -300,6 +315,7 @@ public class AppWindow extends ApplicationWindow {
 	}// getRunTestingTask
 
 	void parseRecord(String str, TestingRecord record) {
+		record.setStatus(TestingRecord.STATUS_PARSING);
 		String[] parts = str.split("\\|");
 		record.setNo(parts[0]);
 		record.setMethod(parts[1]);
@@ -307,10 +323,42 @@ public class AppWindow extends ApplicationWindow {
 		record.setPass(parts[6]);
 		record.setExpectedStatus(parts[8]);
 		record.setExpectedMsg(parts[11]);
-		record.setUrl(parts[4].replaceAll("\\/v1\\/mgmt\\/idaas", DEFAULT_URL)
-				.replaceAll("#", "|"));
-		record.setHead(parts[7].replaceAll("\\[tenant\\]", DEFAULT_TENANT));
+
+		Properties prop;
+		try {
+			prop = IdaasTestingConfig.getInstance().getProp();
+
+			// host
+			String hostmode = prop.getProperty(IdaasTestingConfig.CFG_HOSTMODE);
+			if (hostmode == null || hostmode.equals("local")) {
+				record.setUrl(parts[4].replaceAll("\\/v1\\/mgmt\\/idaas",
+						DEFAULT_URL).replaceAll("#", "|"));
+			} else if (prop.getProperty(IdaasTestingConfig.CFG_HOST) != null) {
+				record.setUrl(parts[4].replaceAll(
+						"\\/v1\\/mgmt\\/idaas",
+						String.format("https://%s:443/v1/mgmt/idaas",
+								prop.getProperty(IdaasTestingConfig.CFG_HOST)))
+						.replaceAll("#", "|"));
+			} else {
+				record.setUrl(parts[4].replaceAll("\\/v1\\/mgmt\\/idaas",
+						DEFAULT_URL).replaceAll("#", "|"));
+			}
+
+			// tenant
+			if (prop.getProperty(IdaasTestingConfig.CFG_TENANT1) != null) {
+				record.setHead(parts[7].replaceAll("\\[tenant\\]",
+						prop.getProperty(IdaasTestingConfig.CFG_TENANT1)));
+			} else {
+				record.setHead(parts[7].replaceAll("\\[tenant\\]",
+						DEFAULT_TENANT));
+			}
+		} catch (IOException e) {
+			record.setStatus(TestingRecord.STATUS_PARSE_ERROR);
+			e.printStackTrace();
+		}
+
 		record.setData(parts[9]);
+		record.setStatus(TestingRecord.STATUS_PARSED);
 	}
 
 	// TODO: move to another class
@@ -336,7 +384,7 @@ public class AppWindow extends ApplicationWindow {
 		return headers;
 	}
 
-	// TODO: move to util class
+	// TODO: move to utility class
 	private String trimFirstAndLast(String str, String lch, String rch) {
 		if (str == null)
 			return null;
@@ -348,5 +396,4 @@ public class AppWindow extends ApplicationWindow {
 
 		return str;
 	}
-
 }
