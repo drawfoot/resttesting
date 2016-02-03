@@ -8,10 +8,10 @@ import java.util.regex.Pattern;
 
 public class TestingRecordParser {
 
-	private String DEFAULT_URL = "http://localhost:9080/com.ibm.security.access.idaas.rest.services";
-	private String DEFAULT_TENANT = "1.wga1.ibmcloudsecurity.com";
+	private static String DEFAULT_URL = "http://localhost:9080/com.ibm.security.access.idaas.rest.services";
+	private static String DEFAULT_TENANT = "1.wga1.ibmcloudsecurity.com";
 	
-	public void parseRecord(String str, TestingRecord record) {
+	public static void parseRecord(String str, TestingRecord record) {
 		record.setStatus(TestingRecord.STATUS_PARSING);
 		String[] parts = str.split("\\|");
 		record.setNo(parts[0]);
@@ -63,7 +63,7 @@ public class TestingRecordParser {
 		record.setStatus(TestingRecord.STATUS_PARSED);
 	}
 
-	public HashMap<String, String> getHeader(String headerstr) {
+	public static HashMap<String, String> getHeader(String headerstr) {
 		HashMap<String, String> headers = new HashMap<String, String>();
 		String[] entries = trimFirstAndLast(headerstr, "{", "}").split(",");
 		String prevKey = "notvalid";
@@ -85,7 +85,7 @@ public class TestingRecordParser {
 		return headers;
 	}
 	
-	public String trimFirstAndLast(String str, String lch, String rch) {
+	public static String trimFirstAndLast(String str, String lch, String rch) {
 		if (str == null)
 			return null;
 
@@ -96,8 +96,8 @@ public class TestingRecordParser {
 
 		return str;
 	}
-	
-	public void discoverRunningStatus(TestingRecord record) {
+
+	public static void discoverRunningStatus(TestingRecord record) {
 		boolean success = false;
 		// status code
 		if (record.getExpectedStatus().equals(record.getActualStatus())){

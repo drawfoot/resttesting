@@ -21,6 +21,7 @@ public class TestingRecord {
 	public static final String STATUS_PARSED = "parsed";
 	public static final String STATUS_PARSE_ERROR = "parse error";
 	public static final String STATUS_RUNNING = "running";
+	public static final String STATUS_RUN_NOT_START = "run not started";
 	public static final String STATUS_RUN_ERROR = "run error";
 	public static final String STATUS_RUN_SUCCESS = "run successful";
 	public static final String STATUS_RUN_FAILED = "run failed";	

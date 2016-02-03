@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
+import com.ibm.sg.idaastesting.AppWindow;
 import com.ibm.sg.idaastesting.model.TestingRecord;
 import com.ibm.sg.idaastesting.model.TestingRecordList;
 
@@ -29,11 +30,11 @@ public class RTTableViewer{
 	private RTSorter sorter;	
 	CheckboxTableViewer viewer;
 	RTFilter filter = new RTFilter();
-	TestingRecordList recList;
+	AppWindow app;
 	
-	public RTTableViewer(Composite parent, int style, TestingRecordList recList) {
+	public RTTableViewer(Composite parent, int style, AppWindow app) {
 		viewer = CheckboxTableViewer.newCheckList(parent, style);
-		this.recList = recList;
+		this.app = app;
 		build();
 	}
 
@@ -74,8 +75,9 @@ public class RTTableViewer{
 		addCheckStateProvider(viewer);
 		sorter = new RTSorter(viewer);
 		viewer.addFilter(filter);		
-		viewer.setInput(recList.getModel());			
+		viewer.setInput(app.getTestingRecordList().getModel());			
 	}
+
 	public void adjustColumnWidth() {
         Table table = viewer.getTable();
         for (TableColumn tc : table.getColumns())

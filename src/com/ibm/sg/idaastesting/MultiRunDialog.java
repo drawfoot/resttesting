@@ -9,6 +9,7 @@ import java.util.Vector;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.List;
@@ -17,6 +18,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
@@ -55,8 +57,10 @@ public class MultiRunDialog extends Dialog {
 	private Button btnAddNewRunner;
 	private static TestingRecordList allItems = new TestingRecordList();
 	private static Map<String, TestingRecordList> runnersMap = new HashMap<String, TestingRecordList>();
+	private Text textRepeat;
+	private static int repeatTimes = 1;
 
-	public MultiRunDialog(Shell parentShell, TestingRecordList parsedItems) {
+	public MultiRunDialog(Shell parentShell, AppWindow app) {
 		
 		// pass to parent
 		super(parentShell);
@@ -67,22 +71,27 @@ public class MultiRunDialog extends Dialog {
 		for (TestingRecordList runnerList : runnersMap.values())
 			if (!runnerList.isEmpty())
 				return;
-		
+
 		// initialize
-		allItems.addTestingRecord(parsedItems.getModel());
+		allItems.addTestingRecord(app.getTestingRecordList().getModel());
 		runnersMap.put("runner1", new TestingRecordList());
 		runnersMap.put("runner2", new TestingRecordList());	
 	}
 
-	public Collection<TestingRecordList> getRunnerItems() {
-		return runnersMap.values();
+	public static TestingRecordList[] getRunnerRecords() {
+		return runnersMap.values().toArray(
+				new TestingRecordList[runnersMap.values().size()]);
 	}
 
-	public void reset() {
+	public static void reset() {
 		allItems.reset();
 		for (TestingRecordList list : runnersMap.values()) {
 			list.reset();
 		}
+	}
+
+	public static int getRepeatTimes() {
+		return repeatTimes;
 	}
 
 	@Override
@@ -278,17 +287,41 @@ public class MultiRunDialog extends Dialog {
 		});
 		btnNewButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		btnNewButton.setText("Rename Runner");
-		new Label(container, SWT.NONE);
-		new Label(container, SWT.NONE);
+		
+		Label lblRepeatTimes = new Label(container, SWT.NONE);
+		lblRepeatTimes.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblRepeatTimes.setText("Repeat Times");
+		
+		textRepeat = new Text(container, SWT.BORDER);
+		textRepeat.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
 		initListViewerProviders(listViewerAllItems, allItems.getModel());
 		initListViewerProviders(listViewerRunners, new ArrayList<String>(runnersMap.keySet()));
-		initListViewerProviders(listViewerRunnerItems, null);			
+		initListViewerProviders(listViewerRunnerItems, null);
+		Object element = listViewerRunners.getElementAt(0);
+		if(element!=null) {
+			listViewerRunners.setSelection(new StructuredSelection(
+					listViewerRunners.getElementAt(0)), true);
+		}
 		return container;
 	}
 
 	@Override
 	protected void okPressed() {
+		try {
+			repeatTimes = Integer.parseInt(textRepeat.getText());
+			if(repeatTimes<1) {
+				repeatTimes = 1;
+				MessageDialog.openInformation(getShell(), "",
+						"repeat number should be bigger than 0");
+				return;
+			}
+		} catch(Exception e) {
+			repeatTimes = 1;
+			MessageDialog.openInformation(getShell(), "",
+					"repeat number not valid");
+			return;
+		}
 		super.okPressed();
 	}
 

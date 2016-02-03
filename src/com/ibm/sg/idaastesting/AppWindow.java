@@ -35,18 +35,17 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.layout.RowLayout;
 
 public class AppWindow extends ApplicationWindow {
-	private TextViewer textViewer;
+	private TestingRecordList recordList;
+	private TestRunner testRunner;
+	private TextViewer scriptTextViewer;
 	private RTTableViewer resultTableViewer;
-	private TestingRecordList recordList = new TestingRecordList();
-	private TestingRecordParser recordParser = new TestingRecordParser();
-	private RestHttpClient httpclient = new RestHttpClient();
 	private Text txtSearchText;
-	private Text text;
+	private Text txtPlaceholderId;
+	private Button btnCheckMultiRunner; 
 
 	// TODO: performance and user experience GUI no responding if the network
 	// hang when running test,
 	// TODO: filtering and ids config and default config
-	// TODO: packaging
 
 	// TODO: application state save
 	// TODO: export xsl and report graph
@@ -61,6 +60,8 @@ public class AppWindow extends ApplicationWindow {
 		createActions();
 		addCoolBar(SWT.FLAT);
 		addMenuBar();
+		recordList = new TestingRecordList();
+		testRunner = new TestRunner(this);
 	}
 
 	/**
@@ -85,9 +86,9 @@ public class AppWindow extends ApplicationWindow {
 		grpTestingScripts.setLayout(new FillLayout(SWT.HORIZONTAL));
 
 		// Script Viewer
-		textViewer = new TextViewer(grpTestingScripts, SWT.BORDER | SWT.MULTI
+		scriptTextViewer = new TextViewer(grpTestingScripts, SWT.BORDER | SWT.MULTI
 				| SWT.H_SCROLL | SWT.V_SCROLL);
-		textViewer
+		scriptTextViewer
 				.getTextWidget()
 				.setText(
 						"35.11.1.1|DELETE|[lmi]|lmi|/v1/mgmt/idaas/sanctionedappaces?filter=description=ACE25-description|admin|wrongPswd|{\"accept\":\"application/json\",\"x-forwarded-host\":\"[tenant]\",\"iv-user\":\"ACE1-user\",\"iv-groups\":\"ACE-group1\"}|204||1|(ˆ$) \n"
@@ -121,10 +122,10 @@ public class AppWindow extends ApplicationWindow {
 		grpParsedTestCases.setLayout(new FillLayout(SWT.VERTICAL));
 		// grpParsedTestCases.setLayout(new TableColumnLayout());
 		resultTableViewer = new RTTableViewer(grpParsedTestCases, SWT.BORDER
-				| SWT.FULL_SELECTION | SWT.MULTI, recordList);
+				| SWT.FULL_SELECTION | SWT.MULTI, this);
 
 		Composite composite = new Composite(sashForm_middle, SWT.NONE);
-		composite.setLayout(new RowLayout(SWT.HORIZONTAL));
+		composite.setLayout(new FillLayout(SWT.HORIZONTAL));
 
 		Label lblNewLabel = new Label(composite, SWT.HORIZONTAL | SWT.CENTER);
 		lblNewLabel.setText("Seach By (No./Status/URL/Head)");
@@ -141,11 +142,11 @@ public class AppWindow extends ApplicationWindow {
 		txtSearchText.selectAll();
 
 		Label lblNewLabel_1 = new Label(composite, SWT.HORIZONTAL | SWT.CENTER);
-		lblNewLabel_1.setText("[ID] Placeholder Replacement");
+		lblNewLabel_1.setText("To be implementd: [ID] Placeholder Replacement");
 
 		Combo combo = new Combo(composite, SWT.READ_ONLY);
 
-		text = new Text(composite, SWT.BORDER);
+		txtPlaceholderId = new Text(composite, SWT.BORDER);
 		sashForm_middle.setWeights(new int[] {10, 1});
 
 		// Bottom
@@ -208,20 +209,29 @@ public class AppWindow extends ApplicationWindow {
 		btnMultipleRunSetup.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				MultiRunDialog dialog = new MultiRunDialog(getShell(), recordList);
+				MultiRunDialog dialog = new MultiRunDialog(getShell(), AppWindow.this);
 				dialog.create();
 				dialog.open();
 			}
 		});
 		btnMultipleRunSetup.setText("Multiple Run Setup");
-		Button btnRunTestCases = new Button(sashFormBottomL, SWT.NONE);
+		
+		Composite composite_1 = new Composite(sashFormBottomL, SWT.NONE);
+		composite_1.setLayout(new FillLayout(SWT.VERTICAL));
+		Button btnRunTestCases = new Button(composite_1, SWT.NONE);
 		btnRunTestCases.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				getRunTestingTask().start();
+				if(btnCheckMultiRunner.getSelection())
+					testRunner.runMultipleRunner();					
+				else
+					testRunner.runSingleCheckedRecords(); 
 			}
 		});
 		btnRunTestCases.setText("Run");
+
+		btnCheckMultiRunner = new Button(composite_1, SWT.CHECK | SWT.CENTER);
+		btnCheckMultiRunner.setText("Run Multiple Runner");
 		sashFormBottomL.setWeights(new int[] {1, 1, 1, 1, 1});
 		sashForm.setWeights(new int[] { 1, 4, 1 });
 
@@ -254,6 +264,22 @@ public class AppWindow extends ApplicationWindow {
 		return new Point(682, 524);
 	}
 
+	public TestingRecordList getTestingRecordList() {
+		return recordList;
+	}
+	
+	public TestingRecordList[] getTestingRecordLists() {
+		return MultiRunDialog.getRunnerRecords();
+	}
+	
+	public int getMultipleRunRepeatTimes() {
+		return MultiRunDialog.getRepeatTimes();
+	}
+	
+	public RTTableViewer getResultViewer() {
+		return resultTableViewer;
+	}
+
 	public Thread getParseScriptsTask() {
 		return new Thread() {
 			@Override
@@ -263,9 +289,10 @@ public class AppWindow extends ApplicationWindow {
 					public void run() {
 						// clear old data
 						recordList.reset();
+						MultiRunDialog.reset();
 						resultTableViewer.getViewer().refresh();
 
-						StyledText recordsText = textViewer.getTextWidget();
+						StyledText recordsText = scriptTextViewer.getTextWidget();
 						int totallines = recordsText.getLineCount();
 						int index = 0;
 						String line;
@@ -275,7 +302,7 @@ public class AppWindow extends ApplicationWindow {
 							if (line.equals(""))
 								continue;
 							TestingRecord record = new TestingRecord();
-							recordParser.parseRecord(line, record);
+							TestingRecordParser.parseRecord(line, record);
 							recordList.addTestingRecord(record);
 							resultTableViewer.getViewer().add(record);
 						}// while
@@ -287,53 +314,4 @@ public class AppWindow extends ApplicationWindow {
 		};// thread
 	}// getParseScriptsTask
 
-	public Thread getRunTestingTask() {
-		return new Thread() {
-			@Override
-			public void run() {
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						Object[] items = resultTableViewer.getViewer()
-								.getCheckedElements();
-						for (Object item : items) {
-							TestingRecord data = (TestingRecord) item;
-							if (data.getNo() == null)
-								continue;
-							// TODO: extract to utility function
-							RestRequest restRequest = new RestRequest();
-							restRequest.setEndpointUrl(data.getUrl());
-							restRequest.setUsername(data.getUser());
-							restRequest.setPassword(data.getPass());
-							restRequest.setBody(data.getData());
-							restRequest.setMethod(data.getMethod()
-									.toLowerCase());
-							HashMap<String, String> headers = recordParser
-									.getHeader(data.getHead());
-							restRequest.setHeaderMap(headers);
-							RestResponse response;
-							try {
-								response = httpclient.doRequest(restRequest);
-								data.setActualStatus(String.valueOf(response
-										.getStatusCode()));
-								data.setActualMsg(response.getBody());
-								recordParser.discoverRunningStatus(data);
-							} catch (Exception e) {
-								String msg;
-								if (e.getMessage() != null)
-									msg = TestingRecord.STATUS_RUN_ERROR + ": "
-											+ e.getMessage();
-								else
-									msg = TestingRecord.STATUS_RUN_ERROR;
-								data.setStatus(msg);
-							}
-
-							resultTableViewer.getViewer().update(data,
-									RTColumnInfo.COL_PROPS);
-						} // for
-					} // run
-				}); // Runnable
-			}// run
-		};// thread
-	}// getRunTestingTask
 }
