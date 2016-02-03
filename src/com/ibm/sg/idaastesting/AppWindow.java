@@ -203,6 +203,17 @@ public class AppWindow extends ApplicationWindow {
 			}
 		});
 		btnConfiguration.setText("Configuration");
+		
+		Button btnMultipleRunSetup = new Button(sashFormBottomL, SWT.NONE);
+		btnMultipleRunSetup.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				MultiRunDialog dialog = new MultiRunDialog(getShell(), recordList);
+				dialog.create();
+				dialog.open();
+			}
+		});
+		btnMultipleRunSetup.setText("Multiple Run Setup");
 		Button btnRunTestCases = new Button(sashFormBottomL, SWT.NONE);
 		btnRunTestCases.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -211,6 +222,7 @@ public class AppWindow extends ApplicationWindow {
 			}
 		});
 		btnRunTestCases.setText("Run");
+		sashFormBottomL.setWeights(new int[] {1, 1, 1, 1, 1});
 		sashForm.setWeights(new int[] { 1, 4, 1 });
 
 		return container;

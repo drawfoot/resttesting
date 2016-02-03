@@ -13,7 +13,7 @@ public class RTLongTextCellEditor extends DialogCellEditor {
 
 	@Override
 	protected Object openDialogBox(Control cellEditorWindow) {
-		MessageDialog.openInformation(cellEditorWindow.getShell(), "Test",
+		MessageDialog.openInformation(cellEditorWindow.getShell(), "Detail Information",
 				doGetValue() == null ? "" : doGetValue().toString());
 		return null;
 	}

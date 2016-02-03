@@ -15,13 +15,13 @@ public class RTContentProvider implements IStructuredContentProvider {
 
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
+		// do nothing
 		
 	}
 
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		// TODO Auto-generated method stub
+		// do nothing
 		
 	}
 }

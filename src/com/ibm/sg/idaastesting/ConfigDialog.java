@@ -15,7 +15,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.custom.SashForm;
 import com.ibm.sg.idaastesting.model.IdaasTestingConfig;
 
 public class ConfigDialog extends Dialog {

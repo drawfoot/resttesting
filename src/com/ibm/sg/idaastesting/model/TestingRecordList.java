@@ -21,8 +21,16 @@ public class TestingRecordList {
 		models.addAll(elements);
 	}	
 	
+	public void removeTestingRecord(TestingRecord record) {
+		models.remove(record);
+	}		
+	
 	public void reset() {
 		models.clear();
+	}
+	
+	public boolean isEmpty() {
+		return models.isEmpty();
 	}
 }
 

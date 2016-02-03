@@ -6,10 +6,6 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.wb.swt.SWTResourceManager;
-
-
 public class TestingRecordParser {
 
 	private String DEFAULT_URL = "http://localhost:9080/com.ibm.security.access.idaas.rest.services";

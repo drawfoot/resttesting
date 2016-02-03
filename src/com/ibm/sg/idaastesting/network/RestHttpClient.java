@@ -1,6 +1,5 @@
 package com.ibm.sg.idaastesting.network;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -165,9 +164,9 @@ public class RestHttpClient {
 		return restResponse;
 	}
 	
+	@SuppressWarnings("unused")
 	private String getResponseMessage(RestResponse restResponse)
 			throws IOException {
-
 		String body = restResponse.getBody();
 		OrderedJSONObject jsonObject = (OrderedJSONObject) OrderedJSONObject
 				.parse(body);
