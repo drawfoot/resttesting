@@ -18,13 +18,12 @@ import org.eclipse.jface.text.TextViewer;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 
-import com.ibm.sg.idaastesting.comm.RestHttpClient;
-import com.ibm.sg.idaastesting.comm.RestRequest;
-import com.ibm.sg.idaastesting.comm.RestResponse;
-import com.ibm.sg.idaastesting.config.ConfigDialog;
 import com.ibm.sg.idaastesting.model.TestingRecordList;
 import com.ibm.sg.idaastesting.model.TestingRecord;
 import com.ibm.sg.idaastesting.model.TestingRecordParser;
+import com.ibm.sg.idaastesting.network.RestHttpClient;
+import com.ibm.sg.idaastesting.network.RestRequest;
+import com.ibm.sg.idaastesting.network.RestResponse;
 import com.ibm.sg.idaastesting.resulttable.RTColumnInfo;
 import com.ibm.sg.idaastesting.resulttable.RTTableViewer;
 import org.eclipse.wb.swt.SWTResourceManager;

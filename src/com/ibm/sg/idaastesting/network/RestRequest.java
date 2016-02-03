@@ -1,4 +1,4 @@
-package com.ibm.sg.idaastesting.comm;
+package com.ibm.sg.idaastesting.network;
 
 import java.util.Map;
 
