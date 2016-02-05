@@ -3,10 +3,7 @@ package com.ibm.sg.idaastesting;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Vector;
-
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -23,20 +20,11 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.custom.ViewForm;
-import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.custom.CBanner;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.layout.GridLayout;
-import swing2swt.layout.BoxLayout;
-import swing2swt.layout.BorderLayout;
-import swing2swt.layout.FlowLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.wb.swt.SWTResourceManager;
 
@@ -138,8 +126,8 @@ public class MultiRunDialog extends Dialog {
 				IStructuredSelection allitemSelection = (IStructuredSelection) listViewerAllItems
 						.getSelection();
 				if (!runnerSelection.isEmpty() && !allitemSelection.isEmpty()) {
-					TestingRecordList runnerList = (TestingRecordList) runnersMap
-							.get((String) runnerSelection.getFirstElement());
+					TestingRecordList runnerList = runnersMap
+							.get(runnerSelection.getFirstElement());
 					for(Object element: allitemSelection.toArray()) {
 						allItems.removeTestingRecord((TestingRecord)element);
 						runnerList.addTestingRecord((TestingRecord)element);
@@ -161,12 +149,13 @@ public class MultiRunDialog extends Dialog {
 		listViewerRunners = new ListViewer(container, SWT.BORDER | SWT.V_SCROLL);
 		listViewerRunners
 				.addSelectionChangedListener(new ISelectionChangedListener() {
+					@Override
 					public void selectionChanged(SelectionChangedEvent event) {
 						IStructuredSelection selection = (IStructuredSelection) event
 								.getSelection();
 						if (!selection.isEmpty()) {
-							TestingRecordList runner = (TestingRecordList) runnersMap
-									.get((String) selection.getFirstElement());
+							TestingRecordList runner = runnersMap
+									.get(selection.getFirstElement());
 							listViewerRunnerItems.setInput(runner.getModel());
 							listViewerRunnerItems.refresh();
 						}
@@ -196,8 +185,8 @@ public class MultiRunDialog extends Dialog {
 				IStructuredSelection runnerItemSelection = (IStructuredSelection) listViewerRunnerItems
 						.getSelection();
 				if (!runnerSelection.isEmpty() && !runnerItemSelection.isEmpty()) {
-					TestingRecordList runnerList = (TestingRecordList) runnersMap
-							.get((String) runnerSelection.getFirstElement());
+					TestingRecordList runnerList = runnersMap
+							.get(runnerSelection.getFirstElement());
 					for(Object element: runnerItemSelection.toArray()) {
 						allItems.addTestingRecord((TestingRecord)element);
 						runnerList.removeTestingRecord((TestingRecord)element);
@@ -333,8 +322,9 @@ public class MultiRunDialog extends Dialog {
 		newShell.setText("Multiple Runner Config");
 	}
 
+	@Override
 	protected Point getInitialSize() {
-		return new Point(560, 591);
+		return new Point(556, 563);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -371,6 +361,7 @@ public class MultiRunDialog extends Dialog {
 			}
 		});
 		list.setSorter(new ViewerSorter() {
+			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
 				if(e1 instanceof TestingRecord)
 					return ((TestingRecord) e1).getNo().compareTo(

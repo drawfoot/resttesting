@@ -27,7 +27,7 @@ import org.apache.commons.io.IOUtils;
 import com.ibm.json.java.OrderedJSONObject;
 
 public class RestHttpClient {
-
+	private HttpClient client = getHttpClient();
 	static {
 		ProtocolSocketFactory protcolSocketFactory = new ClientProtocolSocketFactory();
 		Protocol protocol = new Protocol("https", protcolSocketFactory, 443);
@@ -117,7 +117,6 @@ public class RestHttpClient {
 		
 		// execute
 		try {
-			HttpClient client = getHttpClient();
 			client.executeMethod(httpMethod);
 			return getRestResponse(httpMethod);
 		} catch (IOException e) {

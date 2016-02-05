@@ -105,11 +105,14 @@ public class TestingRecordParser {
 		}
 		// message
 		if (success) {
-			String raw = trimFirstAndLast(record.getExpectedMsg(), "{", "}").replace("\\", "\\\\");
+			String raw = trimFirstAndLast(record.getExpectedMsg(), "{", "}");
 			Pattern r = Pattern.compile(raw);
 			Matcher m = r.matcher(record.getActualMsg());
 			if (m.find()) {
 				success = true;
+			}
+			else {
+				success = false;
 			}
 		}
 		

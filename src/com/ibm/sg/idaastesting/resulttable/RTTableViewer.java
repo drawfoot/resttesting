@@ -22,7 +22,6 @@ import org.eclipse.swt.widgets.TableItem;
 
 import com.ibm.sg.idaastesting.AppWindow;
 import com.ibm.sg.idaastesting.model.TestingRecord;
-import com.ibm.sg.idaastesting.model.TestingRecordList;
 
 
 public class RTTableViewer{
@@ -56,7 +55,7 @@ public class RTTableViewer{
 			tblclmnNewColumn.setWidth(100);
 			tblclmnNewColumn.setText(RTColumnInfo.COL_PROPS[i]);
 			if(i==RTColumnInfo.COL_IDX_ACTMSG) {
-			    editors[i] = new RTLongTextCellEditor(table);
+			    editors[i] = new RTLongTextEditor(table);
 			} else {
 				editors[i] = new TextCellEditor(table);
 			}

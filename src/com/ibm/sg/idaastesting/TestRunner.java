@@ -15,7 +15,6 @@ import com.ibm.sg.idaastesting.resulttable.RTColumnInfo;
 import com.ibm.sg.idaastesting.resulttable.RTTableViewer;
 
 public class TestRunner {
-	private RestHttpClient httpclient = new RestHttpClient();
 	private AppWindow app;
 	private RTTableViewer resultTableViewer;
 	
@@ -25,19 +24,21 @@ public class TestRunner {
 	}
 
 	public void runSingleCheckedRecords() {
+		final RestHttpClient httpclient = new RestHttpClient();
 		resultTableViewer = app.getResultViewer();
-		getRunTestingTask(app.getTestingRecordList().getModel(), 1).start();
+		getRunTestingTask(app.getTestingRecordList().getModel(), 1, httpclient).start();
 	}
 	public void runMultipleRunner() {
 		resultTableViewer = app.getResultViewer();
 		for(TestingRecordList list: app.getTestingRecordLists()) {
-			getRunTestingTask(list.getModel(), app.getMultipleRunRepeatTimes())
+			final RestHttpClient httpclient = new RestHttpClient();
+			getRunTestingTask(list.getModel(), app.getMultipleRunRepeatTimes(), httpclient)
 					.start();
 		}
 	}	
 
 	private Thread getRunTestingTask(final List<TestingRecord> records,
-			final int repeat) {
+			final int repeat, final RestHttpClient httpclient) {
 		return new Thread() {
 			@Override
 			public void run() {
