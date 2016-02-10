@@ -2,7 +2,7 @@ package com.ibm.sg.idaastesting;
 
 import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 import org.eclipse.swt.widgets.Display;
 
 import com.ibm.sg.idaastesting.model.TestingRecord;
@@ -17,11 +17,23 @@ import com.ibm.sg.idaastesting.resulttable.RTTableViewer;
 public class TestRunner {
 	private AppWindow app;
 	private RTTableViewer resultTableViewer;
-	
+	private static final Map<String, String> epIds = new HashMap<String,String>();
+
 	public TestRunner(AppWindow app) {
 		this.app = app;
-		
 	}
+	
+	public void createUpdateEpId(String ep, String id) {
+		//synchronized (epIds) {
+			epIds.put(ep, id);
+		//}
+	}
+	
+	public String getEpId(String ep) {
+		//synchronized (epIds) {
+			return epIds.get(ep);
+		//}
+	}	
 
 	public void runSingleCheckedRecords() {
 		final RestHttpClient httpclient = new RestHttpClient();
@@ -57,7 +69,12 @@ public class TestRunner {
 
 						// TODO: extract to utility function
 						RestRequest restRequest = new RestRequest();
-						restRequest.setEndpointUrl(data.getUrl());
+						String epId = getEpId(data.getEndpoint());
+						if (epId != null)
+							restRequest.setEndpointUrl(data.getUrl().replace(
+									"[id]", epId));
+						else
+							restRequest.setEndpointUrl(data.getUrl());
 						restRequest.setUsername(data.getUser());
 						restRequest.setPassword(data.getPass());
 						restRequest.setBody(data.getData());
@@ -71,7 +88,13 @@ public class TestRunner {
 							data.setActualStatus(String.valueOf(response
 									.getStatusCode()));
 							data.setActualMsg(response.getBody());
-							TestingRecordParser.discoverRunningStatus(data);
+							// update result
+							if (TestingRecordParser.discoverRunningStatus(data)
+									&& restRequest.getMethod().equals(
+											RestRequest.METHOD_POST)) {
+								createUpdateEpId(data.getEndpoint(),
+										httpclient.getResponseId(response));
+							}
 						} catch (Exception e) {
 							String msg;
 							if (e.getMessage() != null)

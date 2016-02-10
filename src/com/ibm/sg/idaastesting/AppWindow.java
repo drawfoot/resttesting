@@ -1,6 +1,5 @@
 package com.ibm.sg.idaastesting;
 
-import java.util.HashMap;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
@@ -21,18 +20,12 @@ import org.eclipse.swt.events.SelectionEvent;
 import com.ibm.sg.idaastesting.model.TestingRecordList;
 import com.ibm.sg.idaastesting.model.TestingRecord;
 import com.ibm.sg.idaastesting.model.TestingRecordParser;
-import com.ibm.sg.idaastesting.network.RestHttpClient;
-import com.ibm.sg.idaastesting.network.RestRequest;
-import com.ibm.sg.idaastesting.network.RestResponse;
-import com.ibm.sg.idaastesting.resulttable.RTColumnInfo;
 import com.ibm.sg.idaastesting.resulttable.RTTableViewer;
 import org.eclipse.wb.swt.SWTResourceManager;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.layout.RowLayout;
 
 public class AppWindow extends ApplicationWindow {
 	private TestingRecordList recordList;
@@ -40,13 +33,9 @@ public class AppWindow extends ApplicationWindow {
 	private TextViewer scriptTextViewer;
 	private RTTableViewer resultTableViewer;
 	private Text txtSearchText;
-	private Text txtPlaceholderId;
-	private Button btnCheckMultiRunner; 
+	private Button btnCheckMultiRunner;
 
-	// TODO: performance and user experience GUI no responding if the network
-	// hang when running test,
-	// TODO: filtering and ids config and default config
-
+	// TODO: id place holder
 	// TODO: application state save
 	// TODO: export xsl and report graph
 	// TODO: scripts manager
@@ -86,8 +75,10 @@ public class AppWindow extends ApplicationWindow {
 		grpTestingScripts.setLayout(new FillLayout(SWT.HORIZONTAL));
 
 		// Script Viewer
-		scriptTextViewer = new TextViewer(grpTestingScripts, SWT.BORDER | SWT.MULTI
-				| SWT.H_SCROLL | SWT.V_SCROLL);
+		scriptTextViewer = new TextViewer(grpTestingScripts, SWT.BORDER
+				| SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
+		StyledText styledText = scriptTextViewer.getTextWidget();
+		styledText.setBlockSelection(true);
 		scriptTextViewer
 				.getTextWidget()
 				.setText(
@@ -123,14 +114,20 @@ public class AppWindow extends ApplicationWindow {
 		// grpParsedTestCases.setLayout(new TableColumnLayout());
 		resultTableViewer = new RTTableViewer(grpParsedTestCases, SWT.BORDER
 				| SWT.FULL_SELECTION | SWT.MULTI, this);
+		sashForm_middle.setWeights(new int[] { 16 });
 
-		Composite composite = new Composite(sashForm_middle, SWT.NONE);
+		// Bottom
+		SashForm sashForm_lower = new SashForm(sashForm, SWT.VERTICAL);
+
+		Composite composite = new Composite(sashForm_lower, SWT.NONE);
 		composite.setLayout(new FillLayout(SWT.HORIZONTAL));
 
-		Label lblNewLabel = new Label(composite, SWT.HORIZONTAL | SWT.CENTER);
+		Label lblNewLabel = new Label(composite, SWT.CENTER);
 		lblNewLabel.setText("Seach By (No./Status/URL/Head)");
 
-		txtSearchText = new Text(composite, SWT.BORDER);
+		txtSearchText = new Text(composite, SWT.BORDER | SWT.SEARCH);
+		txtSearchText.setBackground(SWTResourceManager
+				.getColor(SWT.COLOR_TITLE_BACKGROUND_GRADIENT));
 		txtSearchText.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -140,20 +137,11 @@ public class AppWindow extends ApplicationWindow {
 			}
 		});
 		txtSearchText.selectAll();
-
-		Label lblNewLabel_1 = new Label(composite, SWT.HORIZONTAL | SWT.CENTER);
-		lblNewLabel_1.setText("To be implementd: [ID] Placeholder Replacement");
-
-		Combo combo = new Combo(composite, SWT.READ_ONLY);
-
-		txtPlaceholderId = new Text(composite, SWT.BORDER);
-		sashForm_middle.setWeights(new int[] {10, 1});
-
-		// Bottom
-		SashForm sashForm_lower = new SashForm(sashForm, SWT.VERTICAL);
 		SashForm sashFormBottomL = new SashForm(sashForm_lower, SWT.HORIZONTAL);
-		final Button btnCheckAll = new Button(sashFormBottomL, SWT.BORDER
-				| SWT.FLAT | SWT.CHECK | SWT.CENTER);
+
+		SashForm sashForm_1 = new SashForm(sashFormBottomL, SWT.VERTICAL);
+		final Button btnCheckAll = new Button(sashForm_1, SWT.BORDER | SWT.FLAT
+				| SWT.CHECK | SWT.CENTER);
 		btnCheckAll.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -165,8 +153,6 @@ public class AppWindow extends ApplicationWindow {
 		});
 		btnCheckAll.setSelection(true);
 		btnCheckAll.setText("Check All");
-
-		SashForm sashForm_1 = new SashForm(sashFormBottomL, SWT.VERTICAL);
 
 		Button btnCheckSelected = new Button(sashForm_1, SWT.NONE);
 		btnCheckSelected.addSelectionListener(new SelectionAdapter() {
@@ -193,6 +179,7 @@ public class AppWindow extends ApplicationWindow {
 			}
 		});
 		btnUncheckSelected.setText("Uncheck Selected");
+		sashForm_1.setWeights(new int[] { 1, 1, 1 });
 
 		Button btnConfiguration = new Button(sashFormBottomL, SWT.NONE);
 		btnConfiguration.addSelectionListener(new SelectionAdapter() {
@@ -204,36 +191,38 @@ public class AppWindow extends ApplicationWindow {
 			}
 		});
 		btnConfiguration.setText("Configuration");
-		
+
 		Button btnMultipleRunSetup = new Button(sashFormBottomL, SWT.NONE);
 		btnMultipleRunSetup.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				MultiRunDialog dialog = new MultiRunDialog(getShell(), AppWindow.this);
+				MultiRunDialog dialog = new MultiRunDialog(getShell(),
+						AppWindow.this);
 				dialog.create();
 				dialog.open();
 			}
 		});
 		btnMultipleRunSetup.setText("Multiple Run Setup");
-		
+
 		Composite composite_1 = new Composite(sashFormBottomL, SWT.NONE);
 		composite_1.setLayout(new FillLayout(SWT.VERTICAL));
 		Button btnRunTestCases = new Button(composite_1, SWT.NONE);
 		btnRunTestCases.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if(btnCheckMultiRunner.getSelection())
-					testRunner.runMultipleRunner();					
+				if (btnCheckMultiRunner.getSelection())
+					testRunner.runMultipleRunner();
 				else
-					testRunner.runSingleCheckedRecords(); 
+					testRunner.runSingleCheckedRecords();
 			}
 		});
 		btnRunTestCases.setText("Run");
 
 		btnCheckMultiRunner = new Button(composite_1, SWT.CHECK | SWT.CENTER);
 		btnCheckMultiRunner.setText("Run Multiple Runner");
-		sashFormBottomL.setWeights(new int[] {1, 1, 1, 1, 1});
-		sashForm.setWeights(new int[] { 1, 4, 1 });
+		sashFormBottomL.setWeights(new int[] { 1, 1, 1, 1 });
+		sashForm_lower.setWeights(new int[] { 1, 4 });
+		sashForm.setWeights(new int[] { 2, 8, 3 });
 
 		return container;
 	}
@@ -267,15 +256,15 @@ public class AppWindow extends ApplicationWindow {
 	public TestingRecordList getTestingRecordList() {
 		return recordList;
 	}
-	
+
 	public TestingRecordList[] getTestingRecordLists() {
 		return MultiRunDialog.getRunnerRecords();
 	}
-	
+
 	public int getMultipleRunRepeatTimes() {
 		return MultiRunDialog.getRepeatTimes();
 	}
-	
+
 	public RTTableViewer getResultViewer() {
 		return resultTableViewer;
 	}
@@ -292,7 +281,8 @@ public class AppWindow extends ApplicationWindow {
 						MultiRunDialog.reset();
 						resultTableViewer.getViewer().refresh();
 
-						StyledText recordsText = scriptTextViewer.getTextWidget();
+						StyledText recordsText = scriptTextViewer
+								.getTextWidget();
 						int totallines = recordsText.getLineCount();
 						int index = 0;
 						String line;

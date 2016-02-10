@@ -119,7 +119,7 @@ public class RestHttpClient {
 		try {
 			client.executeMethod(httpMethod);
 			return getRestResponse(httpMethod);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
@@ -158,11 +158,23 @@ public class RestHttpClient {
 		restResponse.setStatusCode(httpMethod.getStatusCode());
 		restResponse.setStatusText(httpMethod.getStatusText());
 		restResponse.setHeaderMap(headerMap);
-        String expmsg = IOUtils.toString(httpMethod.getResponseBodyAsStream(), "UTF-8");
-        restResponse.setBody(expmsg);
+		if (httpMethod.getResponseBodyAsStream() != null) {
+			String expmsg = IOUtils.toString(
+					httpMethod.getResponseBodyAsStream(), "UTF-8");
+			restResponse.setBody(expmsg);
+		}
 		return restResponse;
 	}
 	
+	@SuppressWarnings("unused")
+	public String getResponseId(RestResponse restResponse)
+			throws IOException {
+		String body = restResponse.getBody();
+		OrderedJSONObject jsonObject = (OrderedJSONObject) OrderedJSONObject
+				.parse(body);
+		return (String) jsonObject.get("id");
+	}	
+
 	@SuppressWarnings("unused")
 	private String getResponseMessage(RestResponse restResponse)
 			throws IOException {

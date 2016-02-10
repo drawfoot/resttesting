@@ -16,6 +16,7 @@ public class TestingRecord {
 	private String status;
 	private String severity;
 	private boolean checked;
+	private String endpoint;
 
 	public static final String STATUS_PARSING = "parsing";
 	public static final String STATUS_PARSED = "parsed";
@@ -126,6 +127,14 @@ public class TestingRecord {
 
 	public void setChecked(boolean checked) {
 		this.checked = checked;
+	}
+
+	public String getEndpoint() {
+		return endpoint;
+	}
+
+	public void setEndpoint(String endpoint) {
+		this.endpoint = endpoint;
 	}
 	
 }

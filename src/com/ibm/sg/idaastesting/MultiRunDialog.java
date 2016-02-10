@@ -85,7 +85,14 @@ public class MultiRunDialog extends Dialog {
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite container = (Composite) super.createDialogArea(parent);
-		container.setLayout(new GridLayout(5, true));
+		GridLayout gl_container = new GridLayout(5, true);
+		gl_container.marginLeft = 10;
+		gl_container.marginRight = 10;
+		gl_container.verticalSpacing = 0;
+		gl_container.marginHeight = 10;
+		gl_container.marginWidth = 0;
+		gl_container.horizontalSpacing = 0;
+		container.setLayout(gl_container);
 		
 		Label lblNewLabel = new Label(container, SWT.NONE);
 		lblNewLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1));
@@ -103,7 +110,7 @@ public class MultiRunDialog extends Dialog {
 
 		listViewerAllItems = new ListViewer(container, SWT.BORDER | SWT.V_SCROLL | SWT.MULTI);
 		List listAllItems = listViewerAllItems.getList();
-		GridData gd_listAllItems = new GridData(SWT.LEFT, SWT.BOTTOM, false,
+		GridData gd_listAllItems = new GridData(SWT.CENTER, SWT.BOTTOM, false,
 				false, 1, 1);
 		gd_listAllItems.heightHint = 400;
 		gd_listAllItems.widthHint = 80;
@@ -113,6 +120,7 @@ public class MultiRunDialog extends Dialog {
 		compositeAddToRunner.setLayout(null);
 		GridData gd_compositeAddToRunner = new GridData(SWT.CENTER, SWT.FILL,
 				false, false, 1, 1);
+		gd_compositeAddToRunner.heightHint = 400;
 		gd_compositeAddToRunner.widthHint = 80;
 		compositeAddToRunner.setLayoutData(gd_compositeAddToRunner);
 
@@ -162,7 +170,7 @@ public class MultiRunDialog extends Dialog {
 					}
 				});
 		List listRunners = listViewerRunners.getList();
-		GridData gd_listRunners = new GridData(SWT.LEFT, SWT.CENTER, false,
+		GridData gd_listRunners = new GridData(SWT.CENTER, SWT.CENTER, false,
 				false, 1, 1);
 		gd_listRunners.widthHint = 80;
 		gd_listRunners.heightHint = 400;
@@ -172,6 +180,7 @@ public class MultiRunDialog extends Dialog {
 		compositeDelFromRunner.setLayout(null);
 		GridData gd_compositeDelFromRunner = new GridData(SWT.CENTER, SWT.FILL,
 				false, false, 1, 1);
+		gd_compositeDelFromRunner.heightHint = 400;
 		gd_compositeDelFromRunner.widthHint = 80;
 		compositeDelFromRunner.setLayoutData(gd_compositeDelFromRunner);
 
@@ -206,7 +215,7 @@ public class MultiRunDialog extends Dialog {
 
 		listViewerRunnerItems = new ListViewer(container, SWT.BORDER | SWT.V_SCROLL | SWT.MULTI);
 		List listRunnerItems = listViewerRunnerItems.getList();
-		GridData gd_listRunnerItems = new GridData(SWT.LEFT, SWT.CENTER, false,
+		GridData gd_listRunnerItems = new GridData(SWT.CENTER, SWT.CENTER, false,
 				false, 1, 1);
 		gd_listRunnerItems.heightHint = 400;
 		gd_listRunnerItems.widthHint = 80;
@@ -278,15 +287,22 @@ public class MultiRunDialog extends Dialog {
 		btnNewButton.setText("Rename Runner");
 		
 		Label lblRepeatTimes = new Label(container, SWT.NONE);
-		lblRepeatTimes.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblRepeatTimes.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1));
 		lblRepeatTimes.setText("Repeat Times");
 		
 		textRepeat = new Text(container, SWT.BORDER);
-		textRepeat.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		GridData gd_textRepeat = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+		gd_textRepeat.widthHint = 86;
+		textRepeat.setLayoutData(gd_textRepeat);
 
 		initListViewerProviders(listViewerAllItems, allItems.getModel());
 		initListViewerProviders(listViewerRunners, new ArrayList<String>(runnersMap.keySet()));
 		initListViewerProviders(listViewerRunnerItems, null);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
 		Object element = listViewerRunners.getElementAt(0);
 		if(element!=null) {
 			listViewerRunners.setSelection(new StructuredSelection(
@@ -324,7 +340,7 @@ public class MultiRunDialog extends Dialog {
 
 	@Override
 	protected Point getInitialSize() {
-		return new Point(556, 563);
+		return new Point(546, 573);
 	}
 
 	@SuppressWarnings("rawtypes")
