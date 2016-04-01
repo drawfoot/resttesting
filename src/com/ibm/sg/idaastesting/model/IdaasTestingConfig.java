@@ -9,13 +9,15 @@ import java.util.Properties;
 
 public class IdaasTestingConfig {
 	public static final String CFG_HOST = "host";	
-	public static final String CFG_HOSTMODE = "hostmode";
+	public static final String CFG_HOSTMODE = "hostmode";	
+	public static final String CFG_MGA_HOST = "mgahost";
 	public static final String CFG_TENANT1 = "tenant1";
 	public static final String CFG_TENANT2 = "tenant2";	
 	public static final String CFG_APPID = "appid";
 
 	private static final String CFG_HOST_DFT = "localhost";	
-	private static final String CFG_HOSTMODE_DFT = "local";	
+	private static final String CFG_HOSTMODE_DFT = "local";
+	private static final String CFG_MGA_HOST_DFT = "10.1.18.23";	
 	private static final String CFG_TENANT1_DFT = "1.wga1.ibmcloudsecurity.com";	
 	private static final String CFG_TENANT2_DFT = "2.wga1.ibmcloudsecurity.com";	
 	private static final String CFG_APPID_DFT = "1";
@@ -40,10 +42,11 @@ public class IdaasTestingConfig {
 			OutputStream output = new FileOutputStream(CONFIG_FILE);
 			prop.setProperty(CFG_HOST, CFG_HOST_DFT);
 			prop.setProperty(CFG_HOSTMODE, CFG_HOSTMODE_DFT);
+			prop.setProperty(CFG_MGA_HOST, CFG_MGA_HOST_DFT);			
 			prop.setProperty(CFG_TENANT1, CFG_TENANT1_DFT);
 			prop.setProperty(CFG_TENANT2, CFG_TENANT2_DFT);
 			prop.setProperty(CFG_APPID, CFG_APPID_DFT);			
-			prop.store(output, null);	
+			prop.store(output, null);
 		}
 	}
 

@@ -44,7 +44,7 @@ public class MultiRunDialog extends Dialog {
 	private Button btnDelFromRunner;
 	private Button btnAddNewRunner;
 	private static TestingRecordList allItems = new TestingRecordList();
-	private static Map<String, TestingRecordList> runnersMap = new HashMap<String, TestingRecordList>();
+	private static Map<String, TestingRecordList> runnersInfoMap = new HashMap<String, TestingRecordList>();
 	private Text textRepeat;
 	private static int repeatTimes = 1;
 
@@ -52,28 +52,27 @@ public class MultiRunDialog extends Dialog {
 		
 		// pass to parent
 		super(parentShell);
-		
+
 		// use old records
 		if(!allItems.isEmpty())
 			return;
-		for (TestingRecordList runnerList : runnersMap.values())
+		for (TestingRecordList runnerList : runnersInfoMap.values())
 			if (!runnerList.isEmpty())
 				return;
 
 		// initialize
 		allItems.addTestingRecord(app.getTestingRecordList().getModel());
-		runnersMap.put("runner1", new TestingRecordList());
-		runnersMap.put("runner2", new TestingRecordList());	
+		runnersInfoMap.put("runner1", new TestingRecordList());
+		runnersInfoMap.put("runner2", new TestingRecordList());	
 	}
 
-	public static TestingRecordList[] getRunnerRecords() {
-		return runnersMap.values().toArray(
-				new TestingRecordList[runnersMap.values().size()]);
+	public static  Map<String, TestingRecordList> getRunnerInfo() {
+		return runnersInfoMap;
 	}
 
 	public static void reset() {
 		allItems.reset();
-		for (TestingRecordList list : runnersMap.values()) {
+		for (TestingRecordList list : runnersInfoMap.values()) {
 			list.reset();
 		}
 	}
@@ -134,7 +133,7 @@ public class MultiRunDialog extends Dialog {
 				IStructuredSelection allitemSelection = (IStructuredSelection) listViewerAllItems
 						.getSelection();
 				if (!runnerSelection.isEmpty() && !allitemSelection.isEmpty()) {
-					TestingRecordList runnerList = runnersMap
+					TestingRecordList runnerList = runnersInfoMap
 							.get(runnerSelection.getFirstElement());
 					for(Object element: allitemSelection.toArray()) {
 						allItems.removeTestingRecord((TestingRecord)element);
@@ -162,7 +161,7 @@ public class MultiRunDialog extends Dialog {
 						IStructuredSelection selection = (IStructuredSelection) event
 								.getSelection();
 						if (!selection.isEmpty()) {
-							TestingRecordList runner = runnersMap
+							TestingRecordList runner = runnersInfoMap
 									.get(selection.getFirstElement());
 							listViewerRunnerItems.setInput(runner.getModel());
 							listViewerRunnerItems.refresh();
@@ -194,7 +193,7 @@ public class MultiRunDialog extends Dialog {
 				IStructuredSelection runnerItemSelection = (IStructuredSelection) listViewerRunnerItems
 						.getSelection();
 				if (!runnerSelection.isEmpty() && !runnerItemSelection.isEmpty()) {
-					TestingRecordList runnerList = runnersMap
+					TestingRecordList runnerList = runnersInfoMap
 							.get(runnerSelection.getFirstElement());
 					for(Object element: runnerItemSelection.toArray()) {
 						allItems.addTestingRecord((TestingRecord)element);
@@ -233,8 +232,8 @@ public class MultiRunDialog extends Dialog {
 						InputDialog dlg = new InputDialog(getShell(), "",
 								"Enter Runner Name", null, null);
 						if (dlg.open() == Window.OK) {
-							runnersMap.put(dlg.getValue(), new TestingRecordList());
-							listViewerRunners.setInput(new ArrayList<String>(runnersMap
+							runnersInfoMap.put(dlg.getValue(), new TestingRecordList());
+							listViewerRunners.setInput(new ArrayList<String>(runnersInfoMap
 									.keySet()));
 							listViewerRunners.refresh();
 						}
@@ -249,12 +248,12 @@ public class MultiRunDialog extends Dialog {
 				IStructuredSelection runnerSelect = (IStructuredSelection)listViewerRunners.getSelection();
 				if(!runnerSelect.isEmpty()) {
 					String runner = (String)runnerSelect.getFirstElement();
-					TestingRecordList runnerItems = runnersMap.get(runner);
+					TestingRecordList runnerItems = runnersInfoMap.get(runner);
 					allItems.addTestingRecord(runnerItems.getModel());
 					listViewerAllItems.refresh();					
 					runnerItems.reset();
 					listViewerRunnerItems.refresh();
-					runnersMap.remove(runner);
+					runnersInfoMap.remove(runner);
 					listViewerRunners.remove(runner);
 				}
 			}
@@ -273,10 +272,10 @@ public class MultiRunDialog extends Dialog {
 					InputDialog dlg = new InputDialog(getShell(), "",
 							"Enter Runner Name", runner, null);
 					if (dlg.open() == Window.OK) {
-						TestingRecordList oldList = runnersMap.get(runner);
-						runnersMap.remove(runner);
-						runnersMap.put(dlg.getValue(), oldList);
-						listViewerRunners.setInput(new ArrayList<String>(runnersMap
+						TestingRecordList oldList = runnersInfoMap.get(runner);
+						runnersInfoMap.remove(runner);
+						runnersInfoMap.put(dlg.getValue(), oldList);
+						listViewerRunners.setInput(new ArrayList<String>(runnersInfoMap
 								.keySet()));
 						listViewerRunners.refresh();
 					}
@@ -294,9 +293,10 @@ public class MultiRunDialog extends Dialog {
 		GridData gd_textRepeat = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 		gd_textRepeat.widthHint = 86;
 		textRepeat.setLayoutData(gd_textRepeat);
+		textRepeat.setText((new Integer(repeatTimes)).toString());
 
 		initListViewerProviders(listViewerAllItems, allItems.getModel());
-		initListViewerProviders(listViewerRunners, new ArrayList<String>(runnersMap.keySet()));
+		initListViewerProviders(listViewerRunners, new ArrayList<String>(runnersInfoMap.keySet()));
 		initListViewerProviders(listViewerRunnerItems, null);
 		new Label(container, SWT.NONE);
 		new Label(container, SWT.NONE);

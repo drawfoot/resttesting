@@ -20,6 +20,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import com.ibm.sg.idaastesting.model.TestingRecordList;
 import com.ibm.sg.idaastesting.model.TestingRecord;
 import com.ibm.sg.idaastesting.model.TestingRecordParser;
+import com.ibm.sg.idaastesting.resulttable.RTColumnInfo;
 import com.ibm.sg.idaastesting.resulttable.RTTableViewer;
 import org.eclipse.wb.swt.SWTResourceManager;
 import org.eclipse.swt.widgets.Text;
@@ -34,6 +35,7 @@ public class AppWindow extends ApplicationWindow {
 	private RTTableViewer resultTableViewer;
 	private Text txtSearchText;
 	private Button btnCheckMultiRunner;
+	private boolean running = false;
 
 	// TODO: id place holder
 	// TODO: application state save
@@ -206,14 +208,49 @@ public class AppWindow extends ApplicationWindow {
 
 		Composite composite_1 = new Composite(sashFormBottomL, SWT.NONE);
 		composite_1.setLayout(new FillLayout(SWT.VERTICAL));
-		Button btnRunTestCases = new Button(composite_1, SWT.NONE);
+		final Button btnRunTestCases = new Button(composite_1, SWT.NONE);
 		btnRunTestCases.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (btnCheckMultiRunner.getSelection())
-					testRunner.runMultipleRunner();
-				else
-					testRunner.runSingleCheckedRecords();
+				class Monitor extends Thread {
+					private boolean monitoring = true;
+
+					@Override
+					public void run() {
+						while (monitoring) {
+							if (!testRunner.isAlive()) {
+								Display.getDefault().asyncExec(new Runnable() {
+									@Override
+									public void run() {
+										btnRunTestCases.setText("Run");
+									}
+								});
+								running = false;
+								monitoring = false;
+							}
+						}
+					}
+					
+					public void kill() {
+						monitoring = false;
+					}
+				};
+				Monitor monitor = new Monitor();
+				if (!running) {
+					if (btnCheckMultiRunner.getSelection())
+						testRunner.run(MultiRunDialog.getRunnerInfo(),
+								MultiRunDialog.getRepeatTimes());
+					else
+						testRunner.run();
+					monitor.start();
+					running = true;
+					btnRunTestCases.setText("Stop");
+				} else {
+					monitor.kill();
+					testRunner.kill();
+					running = false;
+					btnRunTestCases.setText("Run");
+				}
 			}
 		});
 		btnRunTestCases.setText("Run");
@@ -257,10 +294,6 @@ public class AppWindow extends ApplicationWindow {
 		return recordList;
 	}
 
-	public TestingRecordList[] getTestingRecordLists() {
-		return MultiRunDialog.getRunnerRecords();
-	}
-
 	public int getMultipleRunRepeatTimes() {
 		return MultiRunDialog.getRepeatTimes();
 	}
@@ -289,12 +322,11 @@ public class AppWindow extends ApplicationWindow {
 						while (index < totallines) {
 							line = recordsText.getLine(index).trim();
 							index++;
-							if (line.equals(""))
-								continue;
 							TestingRecord record = new TestingRecord();
-							TestingRecordParser.parseRecord(line, record);
-							recordList.addTestingRecord(record);
-							resultTableViewer.getViewer().add(record);
+							if(TestingRecordParser.parseRecord(line, record)) {
+								recordList.addTestingRecord(record);
+								resultTableViewer.getViewer().add(record);
+							}
 						}// while
 						resultTableViewer.adjustColumnWidth();
 						// TODO

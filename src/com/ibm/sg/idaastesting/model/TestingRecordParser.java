@@ -11,15 +11,19 @@ import java.util.regex.Pattern;
 
 public class TestingRecordParser {
 
-	private static String DEFAULT_URL = "http://localhost:9080/com.ibm.security.access.idaas.rest.services";
+	private static String DEFAULT_URL = "http://localhost:9080/v1/mgmt/idaas";
 	private static String DEFAULT_TENANT = "1.wga1.ibmcloudsecurity.com";
 	private static final Set<String> ENDPOINTS = new HashSet<String>(
 			Arrays.asList("sanctionedapps", "sanctionedappaces", "adminops",
 					"connectortemplates", "attributesources", "aliasservice",
 					"sslcertificates/signercert",
-					"sslcertificates/personalcert", "adminops/apiprotection"));
+					"sslcertificates/personalcert", "adminops/apiprotection", "applications", "connectors"));
 
-	public static void parseRecord(String str, TestingRecord record) {
+	public static boolean parseRecord(String str, TestingRecord record) {
+		
+		if (str.equals("") || str.startsWith("#"))
+			return false;
+
 		record.setStatus(TestingRecord.STATUS_PARSING);
 		String[] parts = str.split("\\|");
 		record.setNo(parts[0]);
@@ -35,25 +39,36 @@ public class TestingRecordParser {
 
 			// url
 			String url;
-			String hostmode = prop.getProperty(IdaasTestingConfig.CFG_HOSTMODE);
-			if (hostmode == null || hostmode.equals("local")) {
-				url = parts[4].replaceAll("\\/v1\\/mgmt\\/idaas",
-						DEFAULT_URL).replaceAll("#", "|");
-			} else if (prop.getProperty(IdaasTestingConfig.CFG_HOST) != null) {
-				url = parts[4].replaceAll(
-						"\\/v1\\/mgmt\\/idaas",
-						String.format("https://%s:443/v1/mgmt/idaas",
-								prop.getProperty(IdaasTestingConfig.CFG_HOST)))
-						.replaceAll("#", "|");
+			if (parts[4].indexOf("/v1/mgmt/idaas") != -1) {
+				String hostmode = prop
+						.getProperty(IdaasTestingConfig.CFG_HOSTMODE);
+				if (hostmode == null || hostmode.equals("local")) {
+					// local mode
+					url = parts[4].replaceAll("\\/v1\\/mgmt\\/idaas",
+							DEFAULT_URL).replaceAll("#", "|");
+				} else if (prop.getProperty(IdaasTestingConfig.CFG_HOST) != null) {
+					// remote mode
+					url = parts[4].replaceAll(
+							"\\/v1\\/mgmt\\/idaas",
+							String.format("https://%s:443/v1/mgmt/idaas", prop
+									.getProperty(IdaasTestingConfig.CFG_HOST)))
+							.replaceAll("#", "|");
+				} else {
+					// mode not specified
+					url = parts[4].replaceAll("\\/v1\\/mgmt\\/idaas",
+							DEFAULT_URL).replaceAll("#", "|");
+				}
 			} else {
-				url = parts[4].replaceAll("\\/v1\\/mgmt\\/idaas",
-						DEFAULT_URL).replaceAll("#", "|");
+				url = (String.format("https://%s:443" + parts[4], prop
+						.getProperty(IdaasTestingConfig.CFG_MGA_HOST)))
+				.replaceAll("#", "|");
 			}
+
 			if (prop.getProperty(IdaasTestingConfig.CFG_APPID) != null)
 				url = url.replaceAll("\\[appid\\]",
 						prop.getProperty(IdaasTestingConfig.CFG_APPID));
 			record.setUrl(url);
-			
+
 			// end point
 			for(String ep: ENDPOINTS) {
 				if(parts[4].matches(".*" + ep + ".*")) {
@@ -77,6 +92,8 @@ public class TestingRecordParser {
 
 		record.setData(parts[9]);
 		record.setStatus(TestingRecord.STATUS_PARSED);
+		
+		return true;
 	}
 
 	public static HashMap<String, String> getHeader(String headerstr) {

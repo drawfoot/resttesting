@@ -1,5 +1,6 @@
 package com.ibm.sg.idaastesting;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ public class TestRunner {
 	private AppWindow app;
 	private RTTableViewer resultTableViewer;
 	private static final Map<String, String> epIds = new HashMap<String,String>();
+	private List<TestingRunnable> runnables = new ArrayList<TestingRunnable>();
 
 	public TestRunner(AppWindow app) {
 		this.app = app;
@@ -35,25 +37,73 @@ public class TestRunner {
 		//}
 	}	
 
-	public void runSingleCheckedRecords() {
-		final RestHttpClient httpclient = new RestHttpClient();
+	public void run() {
+		runnables.clear();
+		RestHttpClient httpClient = new RestHttpClient();
 		resultTableViewer = app.getResultViewer();
-		getRunTestingTask(app.getTestingRecordList().getModel(), 1, httpclient).start();
+		TestingRunnable runnable = new TestingRunnable("default", app.getTestingRecordList().getModel(),
+				1, httpClient);
+		runnable.start();
+		runnables.add(runnable);
 	}
-	public void runMultipleRunner() {
-		resultTableViewer = app.getResultViewer();
-		for(TestingRecordList list: app.getTestingRecordLists()) {
-			final RestHttpClient httpclient = new RestHttpClient();
-			getRunTestingTask(list.getModel(), app.getMultipleRunRepeatTimes(), httpclient)
-					.start();
-		}
-	}	
 
-	private Thread getRunTestingTask(final List<TestingRecord> records,
-			final int repeat, final RestHttpClient httpclient) {
-		return new Thread() {
+	public void run(Map<String, TestingRecordList> infoMap, int repeat) {
+		resultTableViewer = app.getResultViewer();
+		runnables.clear();
+		for(Map.Entry<String, TestingRecordList> entry: infoMap.entrySet()) {
+			RestHttpClient httpClient = new RestHttpClient();
+			TestingRunnable runnable = new TestingRunnable(entry.getKey(), entry.getValue().getModel(),
+					repeat, httpClient);
+			runnable.start();
+			runnables.add(runnable);
+		}
+	}
+	
+	public void kill() {
+		for(TestingRunnable runnable: runnables) {
+			runnable.stop();
+			runnable.join();
+		}
+	}
+
+	public boolean isAlive() {
+		for(TestingRunnable runnable: runnables) {
+			if(runnable.isAlive())
+				return true;
+		}
+		return false;
+	}
+
+	private void asyncUpdateResult(final TestingRecord record) {
+		Display.getDefault().asyncExec(new Runnable() {
 			@Override
 			public void run() {
+				resultTableViewer.getViewer().update(record,
+						RTColumnInfo.COL_PROPS);
+			} // run
+		}); // Runnable
+	}
+
+	class TestingRunnable implements Runnable {
+		public Thread t;
+		private String threadName;
+		private List<TestingRecord> records;
+		private RestHttpClient httpClient;
+		private int repeat;
+		boolean suspended = false;
+		boolean stopped = false;		
+
+		TestingRunnable(String threadName, List<TestingRecord> records,
+				int repeat, RestHttpClient httpClient) {
+			this.threadName = threadName;
+			this.records = records;
+			this.repeat = repeat;
+			this.httpClient = httpClient;
+		}
+
+		public void run() {
+			System.out.println("Running " + threadName);
+			try {
 				for (int i = 0; i < repeat; i++) {
 					for (final TestingRecord data : records) {
 						// set status to running
@@ -84,16 +134,17 @@ public class TestRunner {
 						restRequest.setHeaderMap(headers);
 						RestResponse response;
 						try {
-							response = httpclient.doRequest(restRequest);
+							response = httpClient.doRequest(restRequest);
 							data.setActualStatus(String.valueOf(response
 									.getStatusCode()));
 							data.setActualMsg(response.getBody());
 							// update result
-							if (TestingRecordParser.discoverRunningStatus(data)
+							TestingRecordParser.discoverRunningStatus(data);
+							if (data.getActualStatus().equals("201")
 									&& restRequest.getMethod().equals(
 											RestRequest.METHOD_POST)) {
 								createUpdateEpId(data.getEndpoint(),
-										httpclient.getResponseId(response));
+										httpClient.getResponseId(response));
 							}
 						} catch (Exception e) {
 							String msg;
@@ -107,20 +158,61 @@ public class TestRunner {
 
 						// final update
 						asyncUpdateResult(data);
-					}
-				}
-			}// run
-		};// thread
-	}
 
-	private void asyncUpdateResult(final TestingRecord record) {
-		Display.getDefault().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				resultTableViewer.getViewer().update(record,
-						RTColumnInfo.COL_PROPS);
-			} // run
-		}); // Runnable
-	}
+						// suspend
+						synchronized (this) {
+							while (suspended) {
+								wait();
+							}
+						}
 
+						// stop
+						synchronized (this) {
+							if (stopped) {
+								return;
+							}
+						}
+						
+					} // go through records
+				} // repeat
+			} catch (InterruptedException e) {
+				System.out.println("Thread " + threadName + " interrupted.");
+			}
+			System.out.println("Thread " + threadName + " exiting.");
+		}
+
+		public void start() {
+			System.out.println("Starting " + threadName);
+			if (t == null) {
+				t = new Thread(this, threadName);
+				t.start();
+			}
+		}
+
+		void suspend() {
+			suspended = true;
+		}
+			
+		synchronized void resume() {
+			suspended = false;
+			notify();
+		}
+		
+		public void stop() {
+			stopped = true;
+		}
+		
+		public boolean isAlive() {
+			return t.isAlive();
+		}
+		
+		public void join() {
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				System.out.println("Thread " + threadName + " interrupted.");
+				e.printStackTrace();
+			}
+		}
+	} // TestingRunnable
 }
